@@ -1,11 +1,11 @@
 ---
 name: design-anchor
-description: Use when a task touches B2B/SaaS/admin UI, product screens, design prompts, themes, design tokens, component specs, Design Anchor governance, @design components, MCP, sync, audit, or long-term AI coding consistency. Starts by helping the user get a polished first page: detailed prompts are extracted into tokens; incomplete requests are guided with heuristic questions, matched to an internal B2B style prompt, then routed through the design-anchor runtime.
+description: Use when a task touches B2B/SaaS/admin UI, product screens, design prompts, themes, design tokens, component specs, Design Anchor governance, @design components, MCP, sync, audit, or long-term AI coding consistency. Starts by classifying the project and request: detailed prompts are extracted into tokens, incomplete requests are matched to an internal B2B style prompt for a polished first page, and mature existing products are offered a consent-gated governance mode.
 ---
 
 # Design Anchor Skill
 
-Use this skill as the AI entry layer for Design Anchor. Its first job is to help the user quickly reach a polished B2B first page; its second job is to make that page governable through Design Anchor tokens, components, specs, rules, sync, MCP, and audit.
+Use this skill as the AI entry layer for Design Anchor. Its first job is to classify the situation: create a polished B2B first page for new or incomplete products, extract tokens from detailed design prompts, or offer a consent-gated governance mode for mature existing products. Its second job is to make the work governable through Design Anchor tokens, components, specs, rules, sync, MCP, and audit.
 
 The npm package is the actual runtime: it creates project tokens, writes generated AI rules, manages the local `.anchor` control plane, exposes MCP, installs source components on demand, and runs sync/audit.
 
@@ -15,7 +15,7 @@ Use the internal prompt pool as matching material, not as a visible product sect
 
 When a request touches UI, theme, layout, components, tokens, B2B products, SaaS/admin systems, dashboards, CRM/ERP, internal tools, approval systems, settings, or data-management screens, start visibly:
 
-`Design Anchor 预检：我会先判断需求完整度；如果风格已经清晰就抽取 token，如果还不完整会先帮你匹配合适风格，再用 @design 生成首个页面。`
+`Design Anchor 预检：我会先判断项目成熟度和需求完整度；新页面会先匹配/抽取风格 token，已有完整产品会先征求你确认是否进入治理模式。`
 
 Then inspect the target project before editing when a project directory is available:
 
@@ -82,11 +82,14 @@ npx design-anchor hydrate
 
 ### Completeness Check
 
-Classify the user's request before generating:
+Classify the project and request before generating:
 
+- **Mature existing product**: probe reports `recommendedMode: "offer-existing-product-governance"` or the project clearly has many existing pages/components/styles.
 - **Detailed design prompt**: includes a clear product/page goal plus enough visual direction, density, tone, layout, or interaction language to extract tokens.
 - **Incomplete product request**: names a product, page, or workflow but does not provide enough style direction.
 - **Incomplete style request**: gives mood or aesthetics but does not define the product workflow.
+
+For a mature existing product, do not start rewriting or normalizing UI automatically. Read `references/govern-existing-product.md`, explain risk, and ask for explicit confirmation. Default to read-only audit.
 
 For a detailed design prompt, do not ask style-matching questions. Save the prompt and run token extraction.
 
@@ -97,6 +100,25 @@ For incomplete input, ask one concise heuristic question when needed. Prefer cho
 If the user does not answer or the task should move fast, infer from product context and continue.
 
 Read `references/style-source-selection.md` before matching an internal style prompt.
+
+### Mature Existing Product Governance
+
+Use this when the project appears complete or already has substantial product UI. This mode is for governing an existing product, not creating a new first page.
+
+Before any file changes:
+
+1. Run only read-only inspection.
+2. Explain the risk clearly: component organization, token naming, style references, import paths, and UI behavior may change.
+3. Recommend a new git branch and the read-only audit option first.
+4. Offer exactly these choices:
+   - `只读审计`: scan and report only; no file changes.
+   - `生成治理计划`: produce a phased plan; no file changes.
+   - `开始第一阶段治理`: make limited first-stage changes only after explicit confirmation.
+5. Wait for the user to confirm. Do not treat silence, vague approval, or a different feature request as consent.
+
+Allowed explicit confirmations include phrases such as `确认，开始治理`, `开始第一阶段治理`, `govern`, or `我同意风险，开始`.
+
+When confirmed, use `references/govern-existing-product.md` as the execution prompt. Keep each stage small; token remapping, component normalization, and business-code rewrites should remain separate confirmation gates.
 
 ### Detailed Prompt To Tokens
 
@@ -182,6 +204,7 @@ Use the npm runtime for continuing work:
 Read only what the task needs:
 
 - `references/project-contract.md` before installs, file-boundary decisions, source-vs-consumer detection, or component/token writes.
+- `references/govern-existing-product.md` before offering or executing governance for a mature existing product.
 - `references/b2b-product-context.md` before creating B2B product screens.
 - `references/style-source-selection.md` before matching incomplete input to an internal style prompt.
 - `references/b2b-design-prompt-pool.md` when selecting an internal prompt.

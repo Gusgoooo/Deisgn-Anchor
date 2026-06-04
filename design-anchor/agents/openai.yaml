@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Anchor"
-  short_description: "Prompt-matched B2B UI governance"
-  default_prompt: "Use $design-anchor to help the user start with a polished B2B page: inspect request completeness, extract tokens from detailed design prompts, ask a short heuristic question when input is incomplete, match an internal style prompt without exposing preset names, activate the design-anchor runtime, add only needed @design source components, and keep UI work governed by tokens, specs, sync, MCP, and audit."
+  short_description: "B2B UI generation and governance"
+  default_prompt: "Use $design-anchor to classify the project and request: generate a polished first B2B page from detailed or matched style prompts, or if the project is already mature, offer consent-gated existing-product governance with risk disclosure, read-only audit, governance plan, or explicitly confirmed first-stage changes. Keep UI work governed by tokens, @design components, specs, sync, MCP, and audit."

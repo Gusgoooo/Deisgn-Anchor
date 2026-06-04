@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const target = resolve(process.argv[2] || process.cwd());
@@ -22,6 +22,43 @@ function readJson(path) {
 
 function has(rel) {
   return existsSync(join(target, rel));
+}
+
+function countFiles(rel, extensions, options = {}) {
+  const root = join(target, rel);
+  const maxDepth = options.maxDepth ?? 4;
+  const ignored = new Set([
+    "node_modules",
+    ".git",
+    ".next",
+    ".nuxt",
+    ".anchor",
+    "dist",
+    "build",
+    "coverage",
+    ...(options.ignored || []),
+  ]);
+
+  function walk(dir, depth) {
+    if (depth > maxDepth) return 0;
+    let entries = [];
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return 0;
+    }
+
+    return entries.reduce((count, entry) => {
+      if (ignored.has(entry.name)) return count;
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) return count + walk(path, depth + 1);
+      if (!entry.isFile()) return count;
+      if (options.exclude?.some((part) => path.includes(part))) return count;
+      return extensions.some((ext) => entry.name.endsWith(ext)) ? count + 1 : count;
+    }, 0);
+  }
+
+  return walk(root, 0);
 }
 
 function packageManager() {
@@ -105,11 +142,77 @@ function addCommand(pm) {
   return "npx design-anchor add <component>";
 }
 
+function dependencyNames(pkg) {
+  return new Set([
+    ...Object.keys(pkg?.dependencies || {}),
+    ...Object.keys(pkg?.devDependencies || {}),
+    ...Object.keys(pkg?.optionalDependencies || {}),
+  ]);
+}
+
+function hasKnownUiDependency(pkg) {
+  const names = dependencyNames(pkg);
+  return [
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-dropdown-menu",
+    "@mui/material",
+    "@chakra-ui/react",
+    "antd",
+    "react-aria-components",
+    "next-themes",
+    "class-variance-authority",
+    "tailwind-variants",
+    "lucide-react",
+  ].some((name) => names.has(name));
+}
+
+function projectSignals(pkg) {
+  const uiExtensions = [".tsx", ".jsx", ".vue", ".svelte"];
+  const styleExtensions = [".css", ".scss", ".sass", ".less"];
+  const appFiles = countFiles("src/app", uiExtensions)
+    + countFiles("src/pages", uiExtensions)
+    + countFiles("app", uiExtensions)
+    + countFiles("pages", uiExtensions);
+  const componentFiles = countFiles("src/components", uiExtensions, {
+    exclude: [`${join("src", "components", "anchor-ui")}`],
+  });
+  const routeFiles = countFiles("src/routes", uiExtensions) + countFiles("routes", uiExtensions);
+  const styleFiles = countFiles("src", styleExtensions) + countFiles("styles", styleExtensions);
+  const hasTailwindConfig = has("tailwind.config.js")
+    || has("tailwind.config.cjs")
+    || has("tailwind.config.mjs")
+    || has("tailwind.config.ts");
+  const hasUiDependency = hasKnownUiDependency(pkg) || has("components.json");
+  const score = appFiles * 2
+    + routeFiles * 2
+    + componentFiles
+    + Math.min(styleFiles, 8)
+    + (hasUiDependency ? 6 : 0)
+    + (hasTailwindConfig ? 3 : 0);
+  const projectMaturity = score >= 24
+    ? "complete"
+    : score >= 10
+      ? "established"
+      : "new-or-small";
+
+  return {
+    appFiles,
+    routeFiles,
+    componentFiles,
+    styleFiles,
+    hasTailwindConfig,
+    hasUiDependency,
+    score,
+    projectMaturity,
+  };
+}
+
 const pkg = readJson(join(target, "package.json"));
 const pm = packageManager();
 const isSourceRepo = pkg?.name === "design-anchor"
   && has("bin/anchor.mjs")
   && has("src/anchor-portal");
+const signals = projectSignals(pkg);
 
 const result = {
   target,
@@ -117,6 +220,14 @@ const result = {
   hasPackageJson: Boolean(pkg),
   packageName: pkg?.name || null,
   isDesignAnchorSourceRepo: isSourceRepo,
+  projectMaturity: isSourceRepo ? "source-package" : signals.projectMaturity,
+  recommendedMode: isSourceRepo
+    ? "source-package"
+    : signals.projectMaturity === "complete"
+      ? "offer-existing-product-governance"
+      : "first-page-or-incremental-ui",
+  governanceRequiresExplicitConsent: signals.projectMaturity === "complete" && !isSourceRepo,
+  projectSignals: signals,
   designAnchorDependency: dependencyVersion(pkg),
   designAnchorNodeModuleVersion: nodeModuleVersion(),
   hasAnchorControlPlane: has(".anchor/package.json")
@@ -147,6 +258,10 @@ if (isSourceRepo) {
 } else {
   if (!result.hasPackageJson) {
     result.recommendedNextSteps.push("No package.json found; confirm the app root before installing Design Anchor.");
+  }
+
+  if (result.recommendedMode === "offer-existing-product-governance") {
+    result.recommendedNextSteps.push("This looks like an existing product. Offer `只读审计`, `生成治理计划`, or `开始第一阶段治理`; do not modify files until the user explicitly confirms the governance mode and acknowledges risk.");
   }
 
   if (!result.designAnchorDependency && !result.designAnchorNodeModuleVersion) {

@@ -1,37 +1,33 @@
-# SaaS Style 01 B2B Prompt
+---
+name: "Modern SaaS"
+slug: "saas-style-01"
+user_facing_direction: "现代 SaaS"
+best_for:
+  - "analytics dashboard"
+  - "product-led SaaS"
+  - "collaboration"
+  - "usage dashboard"
+  - "growth workflow"
+avoid_for:
+  - "strict compliance console"
+  - "dense incident response"
+keywords:
+  - "analytics"
+  - "metrics"
+  - "collaboration"
+  - "growth"
+  - "activity"
+density: "balanced"
+tone: "fresh, capable, optimistic"
+mode: "light"
+---
 
-Use this file for modern, clean, product-led SaaS screens. Append new `saas-style-01` prompts here.
+# Internal Style Prompt: Modern SaaS
 
-## Style Intent
+Design a modern SaaS product surface that feels polished, energetic, and product-led while staying practical for B2B work. It should suit analytics, collaboration, onboarding progress, usage dashboards, workflow management, and growth/product operations.
 
-Build for clarity, momentum, and extensibility. The product should feel modern and confident, with useful summaries, clear onboarding, visible team activity, and obvious next actions.
+Use a balanced page rhythm with clear top-level metrics, segmented controls, well-grouped cards, useful charts, activity streams, and progressive disclosure. Surfaces can feel slightly more expressive than a dense admin tool, but the layout must remain usable and repeatable.
 
-## Best For
+The mood is fresh, capable, optimistic, and organized. Avoid generic marketing hero composition. Make the first page feel impressive through a strong product header, meaningful sample data, crisp cards, clear action paths, and smooth visual hierarchy.
 
-- SaaS dashboards
-- Product analytics
-- Team collaboration
-- PLG onboarding
-- Customer success tools
-- Reporting homes
-- Modern admin apps
-
-## Core Prompt
-
-Design a modern SaaS home screen with KPI cards, trend modules, team activity, onboarding progress, recommended actions, and a clean navigation structure. Make the screen feel product-led, confident, and easy to extend into more pages.
-
-Use balanced density, clear section hierarchy, practical charts, friendly but professional status treatments, and enough product context that the screen feels like an actual app rather than a component showcase.
-
-## Page Variants
-
-### Analytics Home
-
-Design an analytics dashboard with date range controls, KPI cards, trend charts, segment comparison, annotations, team activity, and export actions. Make insight and next action equally visible.
-
-### Onboarding Hub
-
-Design an onboarding hub with setup progress, checklist groups, recommended next steps, integration status, team invitations, and product usage feedback. Keep the flow motivating but operational.
-
-### Data Table Management
-
-Design a data-management page with saved views, search, filters, sortable columns, row selection, bulk actions, pagination, status chips, inline metadata, and a detail drawer or detail page. Include empty, loading, error, and selected-row states when implementing.
+Translate this into Design Anchor tokens for modern radius, readable type scale, confident primary accents, soft but clear surfaces, and clean interaction states.

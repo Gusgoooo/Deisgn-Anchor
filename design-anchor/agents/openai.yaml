@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Anchor"
-  short_description: "Prompt-to-governed UI gateway"
-  default_prompt: "Use $design-anchor to install and activate Design Anchor, turn a user prompt or preset style source into tokens/components/spec rules, generate governed UI, and route ongoing work through npx design-anchor."
+  short_description: "Prompt-matched B2B UI governance"
+  default_prompt: "Use $design-anchor to help the user start with a polished B2B page: inspect request completeness, extract tokens from detailed design prompts, ask a short heuristic question when input is incomplete, match an internal style prompt without exposing preset names, activate the design-anchor runtime, add only needed @design source components, and keep UI work governed by tokens, specs, sync, MCP, and audit."

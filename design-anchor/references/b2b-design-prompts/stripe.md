@@ -1,37 +1,33 @@
-# Stripe B2B Prompt
+---
+name: "Trustworthy Enterprise"
+slug: "stripe"
+user_facing_direction: "稳重可信"
+best_for:
+  - "billing"
+  - "finance"
+  - "compliance"
+  - "account management"
+  - "enterprise settings"
+avoid_for:
+  - "real-time command center"
+  - "playful consumer app"
+keywords:
+  - "invoice"
+  - "payment"
+  - "audit"
+  - "risk"
+  - "permissions"
+density: "balanced"
+tone: "credible, stable, precise"
+mode: "light"
+---
 
-Use this file for polished, credible, trust-heavy B2B products. Append new `stripe` prompts here.
+# Internal Style Prompt: Trustworthy Enterprise
 
-## Style Intent
+Design a B2B interface that feels credible, stable, and commercially trustworthy. It should suit billing, finance, compliance, account management, permissions, and enterprise workflows where users need confidence, clarity, and traceability.
 
-Build for trust, clarity, and confident business action. Use generous spacing, careful hierarchy, calm status language, and polished surfaces that make complex account or money workflows feel reliable.
+Use a balanced density with generous grouping, calm surfaces, strong typographic hierarchy, clear separation between summary, detail, and action areas, and visible audit/status cues. Primary actions should feel decisive; warnings and destructive actions should be explicit and reversible. Forms should feel careful and complete.
 
-## Best For
+The mood is professional, composed, precise, and reliable. Avoid flashy decoration. Make the first page feel premium through careful alignment, account-level context, metadata, trustworthy state labels, and polished empty/loading/error states.
 
-- Billing and finance
-- Procurement
-- Compliance workflows
-- Enterprise customer portals
-- Account management
-- Subscription and invoice systems
-- Risk-sensitive business flows
-
-## Core Prompt
-
-Design a polished customer portal that feels credible and calm. Show account health, payment or compliance status, recent activity, important documents, and primary actions. Use generous spacing, clear hierarchy, careful empty states, and reassuring status language.
-
-The screen should make high-stakes information easy to verify. Emphasize primary actions, next deadlines, ownership, document history, and auditability without making the UI feel heavy.
-
-## Page Variants
-
-### Billing Overview
-
-Design a billing overview with current plan, payment status, upcoming invoice, usage summary, saved payment method, recent invoices, and clear upgrade or contact actions. Keep financial information precise and easy to compare.
-
-### Compliance Review
-
-Design a compliance review page with requirement status, missing evidence, reviewer notes, decision history, document uploads, and final approval actions. Make risk and next steps explicit.
-
-### Detail Record
-
-Design a record detail page with a summary header, status, owner, key metadata, primary actions, tabs, related records, timeline/activity, notes, and audit information. Make the page support both quick review and deeper investigation.
+Translate this into Design Anchor tokens for business-grade contrast, consistent spacing, crisp borders, reliable focus rings, and a calm primary color system.

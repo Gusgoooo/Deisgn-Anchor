@@ -1,19 +1,21 @@
 ---
 name: design-anchor
-description: Skill gateway for Design Anchor. Use when the user wants B2B/SaaS/admin UI, a polished page from a design prompt, prompt-to-design-system style transfer, token/theme/component/spec governance, or long-term AI coding consistency. The skill installs the design-anchor npm runtime, initializes project rules, then routes ongoing work through npx design-anchor commands, @design components, tokens, specs, Portal, sync, and audit.
+description: Use when a task touches B2B/SaaS/admin UI, product screens, design prompts, themes, design tokens, component specs, Design Anchor governance, @design components, MCP, sync, audit, or long-term AI coding consistency. Starts by helping the user get a polished first page: detailed prompts are extracted into tokens; incomplete requests are guided with heuristic questions, matched to an internal B2B style prompt, then routed through the design-anchor runtime.
 ---
 
-# Design Anchor Skill Gateway
+# Design Anchor Skill
 
-Use this skill as the AI entry layer for Design Anchor. The skill chooses the route, prepares style sources, and triggers the npm runtime. The `design-anchor` npm package is the lasting governance layer: after initialization it writes project AI coding rules, component specs, token sources, Portal integration, MCP config, and audit hooks, so future AI coding work is governed even when the skill is not explicitly mentioned.
+Use this skill as the AI entry layer for Design Anchor. Its first job is to help the user quickly reach a polished B2B first page; its second job is to make that page governable through Design Anchor tokens, components, specs, rules, sync, MCP, and audit.
 
-Do not treat this skill as a standalone prompt library or component system. Prompts and presets are style sources; Design Anchor stores and enforces the resulting system.
+The npm package is the actual runtime: it creates project tokens, writes generated AI rules, manages the local `.anchor` control plane, exposes MCP, installs source components on demand, and runs sync/audit.
+
+Use the internal prompt pool as matching material, not as a visible product section. Do not tell the user a preset name. Tell them the product-facing result: `我帮你匹配到一个适合这个场景的风格方向，会先转成 token，再生成页面。`
 
 ## First Move
 
-When a request touches B2B products, admin systems, dashboards, SaaS apps, CRM, ERP, internal tools, approval systems, settings, data tables, UI, theme, components, tokens, design prompts, or page layout, start visibly:
+When a request touches UI, theme, layout, components, tokens, B2B products, SaaS/admin systems, dashboards, CRM/ERP, internal tools, approval systems, settings, or data-management screens, start visibly:
 
-`Design Anchor 入口预检：我会先确认项目是否已安装治理运行时；如果没有，会安装 design-anchor 并写入 AI coding 规则。`
+`Design Anchor 预检：我会先判断需求完整度；如果风格已经清晰就抽取 token，如果还不完整会先帮你匹配合适风格，再用 @design 生成首个页面。`
 
 Then inspect the target project before editing when a project directory is available:
 
@@ -23,176 +25,168 @@ node "${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/probe-design-anchor.mjs"
 
 If `CLAUDE_SKILL_DIR` is unavailable and the command cannot resolve, run the same script by absolute path from this skill directory.
 
-## Product Relationship
+## Product Model
 
-The skill and npm package have separate jobs:
+Keep the current Design Anchor boundaries clear:
 
-- **Skill**: entry point, intent router, prompt/preset selection, style source preparation, and command orchestration.
-- **Design Anchor npm runtime**: project initialization, AI coding rules, tokens, components, specs, Portal, MCP, sync, audit, and long-term consistency.
-
-The coupling must stay execution-based. The skill should call the real npm CLI and read project state; it should not duplicate component source, token JSON, Portal implementation, or audit logic.
-
-After `design-anchor` is installed and initialized, the package-generated files make the project behave like always-run governance:
-
-- `AGENTS.md`
-- `CLAUDE.md`
-- `.cursor/rules/anchor.mdc`
-- `.cursor/rules/anchor-selfcheck.mdc`
-- `.github/copilot-instructions.md`
-- `.mcp.json` and `.cursor/mcp.json`
-- `.cursor/hooks.json`
-- `src/design-tokens/tokens.json`
-- `src/components/anchor-ui`
-- `.anchor/src/anchor/schema/components`
+- `design-anchor` is installed as a project dev dependency and called by AI tools or scripts.
+- `.anchor/` is a local, gitignored, rebuildable control plane. Do not import runtime UI from it.
+- User-owned component source lives in `src/components/anchor-ui/` and is committed.
+- Components are added only when needed with `npx design-anchor add <component>`.
+- Business code imports from `@design` or `@/components/anchor-ui`.
+- Design tokens live in `src/design-tokens/tokens.json`; generated CSS lives in `src/styles/design-tokens.generated.css`.
+- User-written components may appear in the component library even if their spec is absent or empty.
+- Internal style prompts may be used to bootstrap a polished first page when the user's input is incomplete.
+- Internal prompt matching is not a visible preset board or product section.
+- There is no mandatory Portal reveal.
 
 ## Activation Contract
 
-Use the skill as the one-time gateway into the Design Anchor runtime.
+Use the lightest command that gets the project governed.
 
 1. Detect the package manager from lockfiles.
-2. If the target project is the `design-anchor` source package itself, do not run `start`; work on the package source.
-3. If `design-anchor` is not in project dependencies, install it first.
-4. Run `npx design-anchor start` from the project root to initialize `.anchor`, visible component source, token source, AI rules, MCP config, audit hooks, and Portal.
-5. After initialization, route all feature commands through `npx design-anchor ...`.
+2. If the target is the `design-anchor` source package itself, do not run `start`; edit package source and use package scripts.
+3. In a consumer project, install `design-anchor` as a dev dependency if missing.
+4. Run `npx design-anchor sync` for background activation. It can hydrate `.anchor`, create/update tokens and generated rules, and prepare MCP without making Portal the first screen.
+5. Run `npx design-anchor start` or `npx design-anchor portal <tab>` only when the user explicitly asks to open/start/view Portal.
 
-Install command by package manager:
+Install commands by package manager:
 
 ```bash
-npm install design-anchor
-npx design-anchor start
+npm install -D design-anchor
+npx design-anchor sync
 ```
 
 ```bash
-pnpm add design-anchor
-pnpm exec anchor start
+pnpm add -D design-anchor
+pnpm exec design-anchor sync
 ```
 
 ```bash
-yarn add design-anchor
-yarn anchor start
+yarn add -D design-anchor
+yarn design-anchor sync
 ```
 
 ```bash
-bun add design-anchor
-bunx design-anchor start
+bun add -d design-anchor
+bunx design-anchor sync
 ```
 
-Do not describe this as onboarding. It is runtime activation: install the npm package, write the project's AI coding rules, and open the Portal/control plane.
+If a cloned project has committed tokens/components/rules but no `.anchor/`, rebuild it with:
+
+```bash
+npx design-anchor hydrate
+```
 
 ## Input Router
 
-Choose one of two entry paths, then converge into the same Design Anchor governance pipeline.
+### Completeness Check
 
-### Path A: User Prompt Style Transfer
+Classify the user's request before generating:
 
-Use this when the user provides a rich design prompt, external UI prompt, visual recipe, copied template prompt, or detailed design direction.
+- **Detailed design prompt**: includes a clear product/page goal plus enough visual direction, density, tone, layout, or interaction language to extract tokens.
+- **Incomplete product request**: names a product, page, or workflow but does not provide enough style direction.
+- **Incomplete style request**: gives mood or aesthetics but does not define the product workflow.
 
-Treat the prompt as a style source, not a one-off page instruction.
+For a detailed design prompt, do not ask style-matching questions. Save the prompt and run token extraction.
 
-1. Ensure Design Anchor is activated.
-2. Save the user's prompt into a project-local markdown file, such as `design-prompt.md` or `.anchor/design-prompt-source.md`.
-3. Run `npx design-anchor theme <prompt-file.md>` to extract token signals and write active prompt style rules.
-4. Generate the requested page using the extracted style plus the product context.
-5. Use `@design` components and semantic token classes.
-6. Run `npx design-anchor sync` and `npx design-anchor audit`.
-7. Open Portal with `npx design-anchor portal tokens` so the user can see the style as governed tokens/components/specs.
+For incomplete input, ask one concise heuristic question when needed. Prefer choices that sound like product direction, not preset names:
 
-### Path B: Need-First Style Source Selection
+`我先给你匹配一个适合的 B2B 风格方向。你更想要：高效紧凑、稳重可信、清爽友好、深色专注，还是实时指挥感？`
 
-Use this when the user gives a vague product need, such as `做一个 CRM 后台`, `做个审批系统`, `做个 B 端首页`, `搭个数据看板`, or `做一个 SaaS 管理台`.
+If the user does not answer or the task should move fast, infer from product context and continue.
 
-1. Infer roles, core objects, workflow, page type, and data density.
-2. Choose a style source from `references/b2b-design-prompt-pool.md`.
-3. Load only the matching style file under `references/b2b-design-prompts/`.
-4. Treat that preset file exactly like a user-provided prompt: it is style source material, not a product template.
-5. Ensure Design Anchor is activated.
-6. Run `npx design-anchor theme <style-source-file.md>`.
-7. Generate the requested page from `style source + product context`.
-8. Run `npx design-anchor sync` and `npx design-anchor audit`.
-9. Open Portal with `npx design-anchor portal tokens`.
+Read `references/style-source-selection.md` before matching an internal style prompt.
 
-## Shared Governance Pipeline
+### Detailed Prompt To Tokens
 
-Both input paths must converge here.
+Use this when the user provides a design prompt, brand direction, visual recipe, copied style prompt, or asks to extract tokens from style language.
 
-Never stop at a generated page. A page is complete only when its style decisions are represented in Design Anchor runtime state.
+1. Ensure the runtime is installed and synced.
+2. Save the prompt into a project-local markdown file, such as `design-prompt.md` or `.anchor/design-prompt-source.md`.
+3. Run `npx design-anchor theme <prompt-file.md>`.
+4. Treat the extracted aesthetic as a light layer for B2B density, hierarchy, rhythm, surface tone, and atmosphere.
+5. Keep component specs, semantic tokens, accessibility, and product workflow stronger than the prompt.
+6. Run `npx design-anchor sync`; run `npx design-anchor audit` when UI changed.
 
-1. Tokens live in `src/design-tokens/tokens.json`.
-2. Components live in `src/components/anchor-ui` and are imported from `@design` or `@/components/anchor-ui`.
-3. Component contracts live in `.anchor/src/anchor/schema/components/*.spec.json`.
-4. Active prompt style guidance lives in `.anchor/src/anchor/rules/ACTIVE_PROMPT_STYLE.md` and is mirrored into AI rules by sync.
-5. AI coding rules are generated into `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/anchor.mdc`, `.github/copilot-instructions.md`, and related files.
-6. Always run `npx design-anchor sync` after token/spec/style-rule changes.
-7. Run `npx design-anchor audit` after UI changes.
+Read `references/style-prompt-guidance.md` before using a style prompt.
 
-## Style Source Model
+### Incomplete Request To Matched Prompt
 
-There are two kinds of style sources:
+Use this when the user gives a vague product need, such as `做一个 CRM 后台`, `做个审批系统`, `做个数据看板`, `做一个 SaaS 管理台`, or only provides partial product context.
 
-1. **User-provided prompt**: a rich external prompt supplied by the user.
-2. **Preset prompt**: a built-in Design Anchor style source selected by the skill.
+1. Infer roles, objects, workflows, page type, and density from the request.
+2. Use heuristic Q&A only if the missing answer would change the style or workflow.
+3. List available prompt files with `scripts/list-style-prompts.mjs` or by scanning `references/b2b-design-prompts/*.md`.
+4. Select the best internal prompt using each file's frontmatter scenario metadata.
+5. Load only the selected file under `references/b2b-design-prompts/`.
+6. Do not reveal the preset name; tell the user you matched an appropriate direction.
+7. Save that prompt into a project-local markdown file, such as `.anchor/design-prompt-source.md`.
+8. Run `npx design-anchor theme <prompt-file.md>`.
+9. Generate the first polished page using extracted tokens, product context, `@design` components, and on-demand components.
+10. Run `npx design-anchor sync`; run `npx design-anchor audit` when UI changed.
 
-Both are parsed by the same Design Anchor extraction and application flow. The skill must keep style source and product context separate:
+### First B2B Page
 
-- Style source answers: density, rhythm, contrast, radius, typography, surface hierarchy, state language, and component tone.
-- Product context answers: who uses it, what objects they manage, what workflow they complete, and what page type is needed.
+Use this when the user asks for a B2B product, admin system, dashboard, SaaS app, CRM, ERP, internal tool, approval system, settings area, reporting view, or monitoring console.
 
-Only combine them when generating the governed page.
+1. Infer roles, objects, workflows, page type, and density from the request.
+2. Ensure there is an active style source: either the user's detailed prompt or an internally matched prompt.
+3. Build the actual usable screen or flow, not a marketing landing page.
+4. Make the first page feel impressive through hierarchy, density, layout rhythm, meaningful data, state design, and interaction affordances.
+5. Compose from existing `@design` components and add only the missing components.
+6. Keep the look B2B-appropriate: polished and memorable, but not decorative-heavy.
 
-## B2B Product Context
+Read `references/b2b-product-context.md` before creating B2B product screens.
 
-When the user asks to build a B2B product, admin system, dashboard, SaaS app, CRM, ERP, internal tool, approval system, data-management product, operations console, settings area, or reporting surface, infer or ask briefly for:
+### Design System Inspection
 
-1. User roles: admin, operator, manager, reviewer, customer success, finance, developer, analyst, or end customer.
-2. Core objects: customers, orders, projects, tickets, invoices, tasks, alerts, assets, policies, reports, workflows, or integrations.
-3. Main workflow: browse, filter, edit, approve, monitor, configure, investigate, report, onboard, resolve, or export.
-4. Data density: compact workbench, balanced SaaS, trust-heavy business, friendly platform, dark focused workspace, or command center.
+Use Portal only when the user asks to view, tune, inspect, audit, or document the design system state. Read `references/portal-routing.md` when routing is ambiguous.
 
-Read `references/b2b-product-patterns.md` before creating B2B product screens. Read `references/style-source-selection.md` when choosing a style source from vague user intent. Read `references/b2b-design-prompt-pool.md` when choosing a style source or when the user asks to add, collect, save, expand, or reuse B端设计 prompts.
+## UI Coding Rules
 
-## B2B Design Prompt Pool
+Before writing UI, inspect `@design`, `src/components/anchor-ui`, project tokens, and component specs when available.
 
-The reusable prompt pool is split by style source.
+- Prefer imports from `@design`; otherwise use `@/components/anchor-ui`.
+- Do not import component implementations from `.anchor/` or `node_modules/design-anchor/`.
+- Add only needed components with `npx design-anchor add <component>`.
+- Use Design Anchor components instead of raw governed primitives such as buttons, inputs, dialogs, tabs, selects, tables, cards, and menus.
+- Use semantic token classes such as `bg-primary`, `text-muted-foreground`, `border-border`, and `rounded-lg`.
+- Do not hardcode colors or arbitrary token-sensitive Tailwind values.
+- Keep component implementation changes in `src/components/anchor-ui/`.
+- Keep token edits in `src/design-tokens/tokens.json`, then sync generated CSS/rules.
 
-- Index: `references/b2b-design-prompt-pool.md`
-- Style files: `references/b2b-design-prompts/linear.md`, `stripe.md`, `saas-style-01.md`, `google-style.md`, `minimal-dark.md`, and `hud-dark-style.md`
+If you encounter unsafe UI while editing, fix it in the current task and say:
 
-When the user asks to add, collect, save, expand, or reuse B端设计 prompts, choose the matching style file and append the new prompt there. Preset prompt files should stay style-focused; do not bind them deeply to specific products.
+`Design Anchor 自动治理：已改为组件或语义 token。`
+
+Whenever UI changed, include a final line starting with `Design Anchor 自检` that covers component reuse, token compliance, auto-fixes, unresolved confirmations, and sync/audit status.
 
 ## Command Router
 
 Use the npm runtime for continuing work:
 
-- Initialize / activate: `npx design-anchor start`
-- Apply a style source or user design prompt: `npx design-anchor theme <prompt-file.md>`
-- Open Portal: `npx design-anchor portal tokens`, `components`, `specs`, `theme`, or `docs`
-- Sync generated rules and tokens: `npx design-anchor sync`
+- Install missing runtime: `npm install -D design-anchor`
+- Background activation and rule generation: `npx design-anchor sync`
+- Rebuild local `.anchor/`: `npx design-anchor hydrate`
+- Add a needed source component: `npx design-anchor add <component>`
+- Extract tokens from a style prompt: `npx design-anchor theme <prompt-file.md>`
+- List internal style prompt metadata: `node scripts/list-style-prompts.mjs`
+- Open Portal intentionally: `npx design-anchor portal tokens`, `components`, `specs`, `theme`, or `docs`
 - Audit project compliance: `npx design-anchor audit`
 - Upgrade local kit from the npm package: `npx design-anchor upgrade`
-- Start MCP server if needed: `npx design-anchor mcp`
+- MCP server command for tools: `npx --no-install design-anchor mcp ./.anchor`
 
-Open Portal instead of editing blindly when the user wants to inspect or tune design-system state. Read `references/portal-routing.md` when intent routing is ambiguous. Read `references/project-contract.md` before changing files, tokens, component specs, install commands, or source-vs-consumer boundaries.
+## References
 
-## Coding Rules
+Read only what the task needs:
 
-When writing UI:
-
-- Prefer imports from `@design`; otherwise use `@/components/anchor-ui`.
-- Do not import component implementations from `node_modules/design-anchor` or `.anchor` deep paths.
-- Use Design Anchor components instead of raw `<button>`, `<input>`, `<table>`, dialogs, tabs, selects, and other governed primitives.
-- Use semantic token classes such as `bg-primary`, `text-muted-foreground`, `border-border`, and `rounded-lg`.
-- Do not hardcode colors, arbitrary token-sensitive Tailwind values, or one-off component variants.
-- If you encounter unsafe UI while editing, fix it in the current task and say:
-
-`Design Anchor 自动治理：已改为组件或语义 token。`
-
-Whenever UI changed, include a final line that explicitly starts with `Design Anchor 自检` and covers component reuse, token compliance, auto-fixes, unresolved confirmations, and sync/audit status.
-
-## User-Facing Reveal
-
-After showing the first polished page, explain the distinction:
-
-`这个页面不是一次性 prompt 结果。我已经把它的风格通过 Design Anchor 写进 token、组件规范、AI coding 规则和 audit 链路里：后续继续做页面时，会复用同一套 @design 组件、语义 token、表格/表单/状态规则，不会每次生成一套新风格。`
+- `references/project-contract.md` before installs, file-boundary decisions, source-vs-consumer detection, or component/token writes.
+- `references/b2b-product-context.md` before creating B2B product screens.
+- `references/style-source-selection.md` before matching incomplete input to an internal style prompt.
+- `references/b2b-design-prompt-pool.md` when selecting an internal prompt.
+- `references/style-prompt-guidance.md` before turning a user style prompt into tokens.
+- `references/portal-routing.md` before opening Portal or answering Portal intent questions.
 
 ## Claude Compatibility
 

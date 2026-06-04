@@ -4,9 +4,17 @@ import { join, resolve } from "node:path";
 
 const target = resolve(process.argv[2] || process.cwd());
 
+function readText(path) {
+  try {
+    return readFileSync(path, "utf8");
+  } catch {
+    return "";
+  }
+}
+
 function readJson(path) {
   try {
-    return JSON.parse(readFileSync(path, "utf8"));
+    return JSON.parse(readText(path));
   } catch {
     return null;
   }
@@ -25,8 +33,8 @@ function packageManager() {
 }
 
 function dependencyVersion(pkg) {
-  return pkg?.dependencies?.["design-anchor"]
-    || pkg?.devDependencies?.["design-anchor"]
+  return pkg?.devDependencies?.["design-anchor"]
+    || pkg?.dependencies?.["design-anchor"]
     || pkg?.optionalDependencies?.["design-anchor"]
     || null;
 }
@@ -44,6 +52,59 @@ function hasDesignAlias() {
   });
 }
 
+function gitignoreHasAnchor() {
+  const gitignore = readText(join(target, ".gitignore"));
+  return /(^|\n)\s*\.anchor\/?\s*(\n|$)/.test(gitignore);
+}
+
+function mcpConfigFiles() {
+  return [".mcp.json", ".cursor/mcp.json"].filter(has);
+}
+
+function hasPortableMcpConfig() {
+  return mcpConfigFiles().some((rel) => {
+    const json = readJson(join(target, rel));
+    const servers = json?.mcpServers || json?.servers || {};
+    return Object.values(servers).some((server) => {
+      const command = String(server?.command || "");
+      const args = Array.isArray(server?.args) ? server.args.map(String) : [];
+      const commandLine = [command, ...args].join(" ");
+      return command.includes("npx")
+        && commandLine.includes("design-anchor")
+        && commandLine.includes("mcp")
+        && commandLine.includes("./.anchor");
+    });
+  });
+}
+
+function installCommand(pm) {
+  if (pm === "pnpm") return "pnpm add -D design-anchor";
+  if (pm === "yarn") return "yarn add -D design-anchor";
+  if (pm === "bun") return "bun add -d design-anchor";
+  return "npm install -D design-anchor";
+}
+
+function syncCommand(pm) {
+  if (pm === "pnpm") return "pnpm exec design-anchor sync";
+  if (pm === "yarn") return "yarn design-anchor sync";
+  if (pm === "bun") return "bunx design-anchor sync";
+  return "npx design-anchor sync";
+}
+
+function hydrateCommand(pm) {
+  if (pm === "pnpm") return "pnpm exec design-anchor hydrate";
+  if (pm === "yarn") return "yarn design-anchor hydrate";
+  if (pm === "bun") return "bunx design-anchor hydrate";
+  return "npx design-anchor hydrate";
+}
+
+function addCommand(pm) {
+  if (pm === "pnpm") return "pnpm exec design-anchor add <component>";
+  if (pm === "yarn") return "yarn design-anchor add <component>";
+  if (pm === "bun") return "bunx design-anchor add <component>";
+  return "npx design-anchor add <component>";
+}
+
 const pkg = readJson(join(target, "package.json"));
 const pm = packageManager();
 const isSourceRepo = pkg?.name === "design-anchor"
@@ -58,8 +119,12 @@ const result = {
   isDesignAnchorSourceRepo: isSourceRepo,
   designAnchorDependency: dependencyVersion(pkg),
   designAnchorNodeModuleVersion: nodeModuleVersion(),
-  hasAnchorControlPlane: has(".anchor/src/anchor-portal/vite.config.ts"),
-  hasAnchorComponents: has("src/components/anchor-ui/index.ts"),
+  hasAnchorControlPlane: has(".anchor/package.json")
+    || has(".anchor/src/anchor-portal/vite.config.ts")
+    || has(".anchor/src/anchor/schema"),
+  anchorIsGitignored: gitignoreHasAnchor(),
+  hasInstalledComponents: has("src/components/anchor-ui/index.ts")
+    || has("src/components/anchor-ui"),
   hasTokenSource: has("src/design-tokens/tokens.json"),
   hasGeneratedTokenCss: has("src/styles/design-tokens.generated.css"),
   hasDesignAlias: hasDesignAlias(),
@@ -67,8 +132,8 @@ const result = {
   hasClaudeRules: has("CLAUDE.md"),
   hasCursorAlwaysRules: has(".cursor/rules/anchor.mdc"),
   hasCursorSelfcheckRule: has(".cursor/rules/anchor-selfcheck.mdc"),
-  hasMcpConfig: has(".mcp.json") || has(".cursor/mcp.json"),
-  hasActivePromptStyle: has(".anchor/src/anchor/rules/ACTIVE_PROMPT_STYLE.md"),
+  mcpConfigFiles: mcpConfigFiles(),
+  hasPortableMcpConfig: hasPortableMcpConfig(),
   scripts: {
     syncAnchor: pkg?.scripts?.["sync:anchor"] || null,
     anchorAudit: pkg?.scripts?.["anchor:audit"] || null,
@@ -77,23 +142,45 @@ const result = {
 };
 
 if (isSourceRepo) {
-    result.recommendedNextSteps.push("This is the Design Anchor source repo; do not run `anchor start` here.");
+  result.recommendedNextSteps.push("This is the Design Anchor source repo; do not run consumer `design-anchor start` here.");
+  result.recommendedNextSteps.push("Use package scripts such as `npm run sync:anchor`, `npm run anchor:audit`, `npm run lint`, `npm run typecheck`, or `npm publish --dry-run` as relevant.");
 } else {
+  if (!result.hasPackageJson) {
+    result.recommendedNextSteps.push("No package.json found; confirm the app root before installing Design Anchor.");
+  }
+
   if (!result.designAnchorDependency && !result.designAnchorNodeModuleVersion) {
-    result.recommendedNextSteps.push(`Install with ${pm === "npm" ? "npm install design-anchor" : `${pm} add design-anchor`}.`);
+    result.recommendedNextSteps.push(`Install Design Anchor as a dev dependency with \`${installCommand(pm)}\`.`);
   }
-  if (!result.hasAnchorControlPlane || !result.hasAnchorComponents || !result.hasTokenSource) {
-    result.recommendedNextSteps.push(pm === "npm"
-      ? "Run `npx design-anchor start` to activate runtime governance: components, tokens, AI rules, MCP, audit hooks, and Portal."
-      : `Run \`${pm} exec anchor start\` to activate runtime governance: components, tokens, AI rules, MCP, audit hooks, and Portal.`);
-  } else {
-    result.recommendedNextSteps.push("Design Anchor runtime appears initialized; use `npx design-anchor theme <prompt.md>`, `npx design-anchor sync`, `npx design-anchor audit`, or `npx design-anchor portal tokens` as needed.");
+
+  const needsBackgroundSync = !result.hasTokenSource
+    || !result.hasGeneratedTokenCss
+    || !result.hasAgentsRules
+    || !result.hasCursorAlwaysRules
+    || !result.hasPortableMcpConfig;
+
+  if (needsBackgroundSync) {
+    result.recommendedNextSteps.push(`Run \`${syncCommand(pm)}\` for background governance: tokens, generated CSS, AI rules, MCP config, and local .anchor hydration.`);
   }
-  if (!result.hasAgentsRules || !result.hasClaudeRules || !result.hasCursorAlwaysRules) {
-    result.recommendedNextSteps.push("AI coding rules are incomplete; rerun `npx design-anchor start` or `npx design-anchor sync`.");
+
+  if (!result.hasAnchorControlPlane && (result.hasTokenSource || result.hasAgentsRules || result.hasPortableMcpConfig)) {
+    result.recommendedNextSteps.push(`.anchor/ is local and rebuildable; run \`${hydrateCommand(pm)}\` if Portal, specs, or MCP runtime files are missing after clone.`);
   }
-  if (!result.hasDesignAlias) {
-    result.recommendedNextSteps.push("Check `@design` path alias before writing UI.");
+
+  if (!result.anchorIsGitignored) {
+    result.recommendedNextSteps.push("Add `.anchor/` to .gitignore so the local control plane stays rebuildable and out of source control.");
+  }
+
+  if (!result.hasInstalledComponents) {
+    result.recommendedNextSteps.push(`No Anchor UI source components are installed yet; add only what the current screen needs with \`${addCommand(pm)}\`.`);
+  }
+
+  if (result.hasInstalledComponents && !result.hasDesignAlias) {
+    result.recommendedNextSteps.push("Check the `@design` path alias before writing app UI; business code should import from `@design` or `@/components/anchor-ui`.");
+  }
+
+  if (!needsBackgroundSync && result.hasInstalledComponents) {
+    result.recommendedNextSteps.push("Design Anchor appears ready; continue with `@design` components, semantic tokens, `sync`, and `audit` after UI changes.");
   }
 }
 

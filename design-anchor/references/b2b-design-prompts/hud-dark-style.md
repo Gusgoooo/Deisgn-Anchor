@@ -1,37 +1,33 @@
-# HUD Dark Style B2B Prompt
+---
+name: "Live Command Center"
+slug: "hud-dark-style"
+user_facing_direction: "实时指挥感"
+best_for:
+  - "security operations"
+  - "risk control"
+  - "live ops"
+  - "infrastructure monitoring"
+  - "incident response"
+avoid_for:
+  - "friendly onboarding"
+  - "basic settings page"
+keywords:
+  - "monitoring"
+  - "incident"
+  - "severity"
+  - "telemetry"
+  - "alerts"
+density: "command-center"
+tone: "urgent, controlled, technical"
+mode: "dark"
+---
 
-Use this file for high-signal command centers and real-time monitoring products. Append new `hud-dark-style` prompts here.
+# Internal Style Prompt: Live Command Center
 
-## Style Intent
+Design a B2B command-center interface for real-time monitoring, risk control, security operations, infrastructure, trading operations, or incident response. It should feel live, precise, and high-signal while staying usable.
 
-Build for urgency, live status, severity, and drill-down. The screen should feel controlled and operational, not cinematic. Every visual treatment should help prioritize, diagnose, or act.
+Use a dense layout with status rails, severity language, event streams, compact charts, grouped telemetry, ownership, escalation actions, and clear critical states. Dark mode is appropriate when it improves focus, but contrast and readability must remain strong.
 
-## Best For
+The mood is urgent but controlled, technical, high-signal, and operational. Avoid decorative sci-fi visuals. Make the first page feel impressive through live data structure, stateful alerts, severity mapping, timelines, and clear next actions.
 
-- Security monitoring
-- Risk control
-- Trading operations
-- Infrastructure ops
-- Incident response
-- Live logistics
-- Executive command centers
-
-## Core Prompt
-
-Design a command-center monitoring screen with severity queues, live metrics, incident timelines, ownership, escalation actions, and drill-down panels. Make it high-signal and controlled, avoiding decorative sci-fi visuals that do not help decisions.
-
-Use strong hierarchy for severity, status, ownership, SLA, and current action. Keep charts practical, labels specific, and alert states easy to compare.
-
-## Page Variants
-
-### Incident Response
-
-Design an incident response console with active incidents, severity filters, affected systems, timeline, owner, escalation path, runbook actions, and postmortem status. Make the next operational move obvious.
-
-### Risk Monitoring
-
-Design a risk monitoring dashboard with risk score, anomalies, rule triggers, affected accounts, investigation queue, evidence panel, and approve/escalate/block actions. Prioritize signal quality.
-
-### Live Operations
-
-Design a live operations board with system status, queue pressure, throughput, SLA breach risk, regional filters, event stream, and intervention actions. Keep the interface dense but legible.
+Translate this into Design Anchor tokens for command-center density, dark or mixed surfaces, strong status colors, crisp borders, and highly visible focus/alert states.

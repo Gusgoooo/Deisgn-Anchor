@@ -1,37 +1,32 @@
-# Minimal Dark B2B Prompt
+---
+name: "Focused Dark Workspace"
+slug: "minimal-dark"
+user_facing_direction: "深色专注"
+best_for:
+  - "AI workspace"
+  - "developer console"
+  - "productivity workspace"
+  - "technical internal tool"
+avoid_for:
+  - "friendly CRM"
+  - "finance portal requiring light trust surfaces"
+keywords:
+  - "AI"
+  - "developer"
+  - "console"
+  - "command"
+  - "workspace"
+density: "compact"
+tone: "technical, premium, controlled"
+mode: "dark"
+---
 
-Use this file for dark, focused, premium AI and productivity workspaces. Append new `minimal-dark` prompts here.
+# Internal Style Prompt: Focused Dark Workspace
 
-## Style Intent
+Design a focused dark B2B workspace that feels refined, technical, and immersive without becoming decorative. It should suit AI tools, developer consoles, productivity systems, internal command centers, and high-attention work.
 
-Build for focused work, careful reading, and high-context decision making. Keep the dark UI calm, legible, and professional. Avoid dramatic glow, theatrical gradients, and low-contrast controls.
+Use dark semantic surfaces, restrained contrast, precise borders, strong active states, compact controls, and clear information layering. Avoid glow-heavy visuals or cinematic effects. The interface should feel quiet and powerful, with excellent readability and clear affordances.
 
-## Best For
+The mood is concentrated, modern, premium, and controlled. Make the first page feel impressive through meaningful panels, command surfaces, status indicators, keyboard-like interactions, and crisp hierarchy.
 
-- AI assistants
-- Model ops consoles
-- Developer tools
-- Analysis workspaces
-- Premium productivity apps
-- Research and evidence review
-- Focused automation surfaces
-
-## Core Prompt
-
-Design a dark focused AI workspace with a compact sidebar, active workspace area, context panel, run history, source/evidence cards, and clear execution states. Keep contrast professional, avoid theatrical glow, and make the next user action obvious.
-
-Use calm dark surfaces, restrained borders, readable text contrast, clear keyboard-oriented workflows, and strong state feedback for running, paused, failed, reviewed, or completed work.
-
-## Page Variants
-
-### AI Run Console
-
-Design an AI run console with prompt/input area, run timeline, tool activity, result preview, source citations, evaluation notes, and retry or approve actions. Make state transitions obvious.
-
-### Evidence Review
-
-Design an evidence review workspace with source list, detail preview, extraction status, confidence indicators, notes, and final decision actions. Keep reading comfort and traceability high.
-
-### Developer Workspace
-
-Design a developer workspace with project navigation, task context, logs, diff summary, test status, and primary continue/review actions. Keep density useful without overwhelming the screen.
+Translate this into Design Anchor tokens for dark mode surfaces, careful contrast, subtle borders, legible muted text, and controlled primary accents.

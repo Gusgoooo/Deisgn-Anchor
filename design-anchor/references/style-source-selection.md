@@ -1,52 +1,65 @@
-# Style Source Selection Reference
+# Style Source Selection
 
-Read this when the user gives a vague product need and the skill should choose a built-in style source before code generation.
+Read this when the user's request is not complete enough to extract a design system from their own words.
 
-Do not treat presets as product templates. Presets and user-provided prompts are both style sources. The skill chooses a style source, then Design Anchor extracts token/style signals with `npx design-anchor theme <prompt.md>`.
+The goal is not to show a preset picker. The goal is to quickly infer a suitable B2B style direction, pull the matching internal prompt file, translate it into Design Anchor tokens, and start building a polished first page.
 
-## Intake Goal
+## Completeness Heuristic
 
-Ask enough to choose a style source, not enough to slow the user down. Use at most three questions. If the user's request already implies a style source, infer it and continue.
+Treat a request as detailed enough when it includes:
 
-## Three Heuristic Questions
+- product or workflow goal,
+- target screen or page type,
+- enough visual direction to infer density, tone, surface style, and hierarchy.
 
-Ask in the user's language. Prefer compact choices plus an open escape hatch.
+Treat it as incomplete when:
 
-1. Product type:
-   `这页更像哪类体验？A 高频克制 / B 高信任商务 / C 现代 SaaS / D 友好易上手 / E 暗色专注 / F 高信号指挥舱`
+- it only names a product category, such as CRM, dashboard, admin, approval, billing, or SaaS,
+- it gives style mood without product workflow,
+- it asks for "cool", "advanced", "professional", or "beautiful" without concrete design language,
+- it lacks whether the interface should feel compact, trustworthy, friendly, dark, or real-time.
 
-2. Primary job:
-   `用户主要在这里做什么？扫数据、处理表单、配置设置、监控风险、转化注册，还是别的？`
+## Heuristic Question
 
-3. Density and mood:
-   `你希望整体密度和氛围是：紧凑克制、平衡清爽、宽松可信、柔和易上手、暗色专注？`
+Ask at most one short question before matching. Use user-facing words, not preset names:
 
-If the user gives a loose product requirement, ask only the missing question. If the user says "你决定", choose the safest style source and explain why.
+`我先给你匹配一个适合的 B2B 风格方向。你更想要：高效紧凑、稳重可信、清爽友好、深色专注，还是实时指挥感？`
 
-## Style Source Mapping
+If the user already gave enough product context, you may infer without asking and say:
 
-| Source | Choose when the user wants | Avoids |
-|---|---|---|
-| `linear` | compact, sharp, quiet, high-frequency, dark-capable product rhythm | decorative heroes, oversized cards, gradients |
-| `stripe` | polished, generous, credible, trust-heavy business rhythm | excessive decoration, shadow-heavy card stacks |
-| `saas-style-01` | clean, confident, product-led baseline | playful decoration, landing-page patterns inside app screens |
-| `google-style` | soft, rounded, familiar, easy to learn | cartoonish UI, oversized pills, low-density operational screens |
-| `minimal-dark` | dark, focused, premium, calm workspace | cinematic dark effects, glowing panels, low-contrast controls |
-| `hud-dark-style` | high-signal, controlled, command-center feel | fake sci-fi ornament, overdramatic metrics |
+`我帮你匹配到一个适合这个场景的风格方向，会先转成 token，再生成页面。`
 
-Default to `saas-style-01` for a general new SaaS page. Default to `linear` for dense existing-product dashboards. Default to `stripe` for money, billing, compliance, or account flows.
+## Prompt Discovery
 
-## Using The Style Source
+Prompt files live under `b2b-design-prompts/*.md`. The skill maintainer can add new prompts by adding one markdown file per prompt. Each file must include the standard frontmatter described in `b2b-design-prompt-pool.md`.
 
-State the chosen source before extraction:
-
-`我会用 Linear style source：它会提供紧凑、克制、适合高频扫描的风格输入，随后交给 Design Anchor 提取 token 和规则。`
-
-Then run the Design Anchor runtime:
+List available prompt metadata with:
 
 ```bash
-npx design-anchor theme <style-source.md>
-npx design-anchor sync
+node "${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/list-style-prompts.mjs"
 ```
 
-The resulting style guidance must remain subordinate to component specs and semantic tokens.
+If the script path is unavailable, inspect `references/b2b-design-prompts/*.md` and read only each file's frontmatter before selecting.
+
+## Matching Rule
+
+Choose the prompt whose `best_for`, `keywords`, `density`, `tone`, and `mode` best match:
+
+- the user's product category,
+- the workflow,
+- the target screen type,
+- the user-facing style direction,
+- and any constraints in `avoid_for`.
+
+The existing prompt files are starter examples. New maintainer-added files are equally valid when their metadata is a better match.
+
+## After Matching
+
+1. Load only the selected prompt file.
+2. Save the prompt into the target project, usually `.anchor/design-prompt-source.md`.
+3. Run `npx design-anchor theme <prompt.md>`.
+4. Sync rules with `npx design-anchor sync`.
+5. Generate the first page with `@design` components and semantic tokens.
+6. Run audit when UI changed.
+
+Never expose the internal prompt filename unless the user explicitly asks how matching works.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Anchor"
+  short_description: "Prompt-to-governed UI gateway"
+  default_prompt: "Use $design-anchor to install and activate Design Anchor, turn a user prompt or preset style source into tokens/components/spec rules, generate governed UI, and route ongoing work through npx design-anchor."

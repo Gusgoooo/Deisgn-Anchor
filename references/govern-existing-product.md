@@ -181,6 +181,107 @@ Color governance targets **structural anchors only** — the critical colors tha
 - WCAG AA contrast violations on text colors.
 - Dark mode parity for structural anchor tokens only.
 
+### Token Identification and Replacement Execution
+
+The audit above identifies WHAT is wrong. This section tells you HOW to find and fix it in the codebase. **This is the core governance action — skip this and token governance is just a report.**
+
+#### Step 1: Scan for hardcoded structural colors
+
+Search the codebase for Tailwind color classes and inline CSS that correspond to structural anchors. Use `grep` or equivalent:
+
+```bash
+# Find hardcoded primary-like colors (buttons, links, active states)
+grep -rn --include="*.tsx" --include="*.jsx" --include="*.css" \
+  'bg-blue-\|bg-indigo-\|bg-violet-\|bg-purple-\|text-blue-\|text-indigo-\|border-blue-\|border-indigo-\|ring-blue-\|ring-indigo-' src/
+
+# Find hardcoded status colors
+grep -rn --include="*.tsx" --include="*.jsx" \
+  'bg-red-\|bg-green-\|bg-yellow-\|bg-orange-\|text-red-\|text-green-\|text-yellow-' src/
+
+# Find hardcoded text/background grays
+grep -rn --include="*.tsx" --include="*.jsx" \
+  'text-gray-\|text-slate-\|text-zinc-\|text-neutral-\|bg-gray-\|bg-slate-\|bg-zinc-\|bg-white\|bg-black' src/
+
+# Find hardcoded hex colors in inline styles or CSS
+grep -rn --include="*.tsx" --include="*.jsx" --include="*.css" \
+  '#[0-9a-fA-F]\{3,8\}' src/
+```
+
+Adjust the color family names based on what the project actually uses (e.g., if the project uses `sky` instead of `blue`, search for `sky`).
+
+#### Step 2: Classify each match
+
+For every hardcoded color found, classify it:
+
+| Classification | Action | Example |
+|---|---|---|
+| **Primary interactive** — button, link, active nav, selected state, toggle, checkbox, focus ring | Replace with `primary` token | `bg-blue-600` → `bg-primary`, `text-blue-600` → `text-primary` |
+| **Primary hover/focus/active** — interactive state of a primary element | Replace with token-derived state | `hover:bg-blue-700` → `hover:bg-primary/90`, `focus:ring-blue-500` → `focus:ring-primary` |
+| **Primary disabled** — disabled state of a primary element | Replace with token + opacity | `bg-blue-300` → `bg-primary/50` or `bg-muted` |
+| **Destructive** — delete buttons, error messages, error borders | Replace with `destructive` token | `bg-red-600` → `bg-destructive`, `text-red-500` → `text-destructive` |
+| **Success** — success messages, completion indicators | Replace with semantic token | `text-green-600` → `text-success` or define `--success` token |
+| **Warning** — warning messages, caution indicators | Replace with semantic token | `text-yellow-600` → `text-warning` or define `--warning` token |
+| **Background surface** — page bg, card bg, sidebar bg | Replace with surface token | `bg-white` → `bg-background`, `bg-gray-50` → `bg-muted` |
+| **Primary text** — main body text | Replace with text token | `text-gray-900` → `text-foreground` |
+| **Secondary text** — descriptions, timestamps, helper text | Replace with muted token | `text-gray-500` → `text-muted-foreground` |
+| **Border** — structural borders around cards, inputs, dividers | Replace with border token | `border-gray-200` → `border-border` |
+| **Decorative** — accent tints, illustration colors, gradients, shadows, page-specific backgrounds | **Keep as-is** | `bg-gradient-to-r from-purple-500 to-pink-500` → preserve |
+| **Data visualization** — chart colors, graph segments | **Keep as-is** | preserve all chart colors |
+
+#### Step 3: Build a replacement map per project
+
+Before making changes, build a concrete mapping table for the specific project. Example:
+
+```
+Project uses indigo as primary:
+  bg-indigo-600       → bg-primary
+  text-indigo-600     → text-primary
+  hover:bg-indigo-700 → hover:bg-primary/90
+  ring-indigo-500     → ring-ring
+  border-indigo-300   → border-primary/30
+
+Project uses gray-900 as text:
+  text-gray-900       → text-foreground
+  text-gray-500       → text-muted-foreground
+  text-gray-400       → text-muted-foreground/80
+
+Project uses white/gray-50 as surfaces:
+  bg-white            → bg-background  (only for page/card surfaces, not decorative)
+  bg-gray-50          → bg-muted       (only for muted surfaces)
+  bg-gray-100         → bg-accent      (only for hover/active surfaces)
+
+Project uses red for errors:
+  bg-red-600          → bg-destructive
+  text-red-600        → text-destructive
+  border-red-300      → border-destructive/30
+```
+
+Present this mapping to the user as part of the per-page restructuring plan. Let them confirm before applying.
+
+#### Step 4: Execute replacements
+
+For each page, apply the replacement map:
+
+1. **Replace primary interactive colors first** — this is the highest-visibility fix.
+2. **Replace interactive states** — ensure hover/focus/active/disabled derive from the token, not from independently picked colors.
+3. **Replace status colors** — destructive, success, warning, info.
+4. **Replace surface and text colors** — background, foreground, muted-foreground, border.
+5. **Verify each replacement visually** — the page should look the same or better after replacement, not washed out.
+6. **Skip decorative colors** — leave gradients, accent tints, illustration colors, shadows, and intentional one-offs untouched.
+
+**Critical: after replacing, verify that `tokens.json` has the correct values.** If the project's primary was `indigo-600` (#4f46e5), `tokens.json` must define `--primary: #4f46e5` (or the HSL equivalent). The replacement only works if the token value matches the original color the product was using. If the token value is wrong, fix `tokens.json` first, then run `npx design-anchor sync`.
+
+#### Step 5: Cross-page consistency check
+
+After processing all pages:
+
+1. Search the entire `src/` for any remaining hardcoded instances of the project's primary color family (e.g., `indigo-`). There should be zero structural uses left.
+2. Verify that every page's primary button renders with `bg-primary` — no page should have a different primary button color.
+3. Check that all focus rings use `ring-ring` or `ring-primary`.
+4. Confirm status colors are consistent: every error on every page uses `destructive`, every success uses the same success token.
+
+Report any remaining inconsistencies in the self-check.
+
 ### Navigation Audit
 
 - Does the product have a consistent shell (sidebar + header + content area)?
@@ -211,11 +312,11 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
 2. **Classify page nature** — Functional（工具型）or Showcase（展示型）. Default is Functional. See SKILL.md Phase 1 for criteria.
 3. **Identify the page's primary user task** and evaluate the current layout against the quality principles.
 4. **Match an open-source block as the page scaffold.** This is the default workflow, not optional:
-   - Dashboard / sidebar / settings / auth → shadcn/ui blocks
-   - Admin CRUD / data tables → shadcn-admin
-   - Extended patterns → Kibo UI
-   - Landing / showcase pages → Launch UI
-   - E-commerce → Commerce UI
+   - Dashboard / sidebar / settings / auth → `npx shadcn@latest add <block-name>` (sidebar-01~15, dashboard-01~07, login-01~05)
+   - Extended patterns (kanban, gantt, timeline, file tree) → `npx kibo-ui add <block-name>`
+   - Landing / showcase pages (hero, navbar, footer, pricing, FAQ) → `npx shadcn@latest add @launchui/<block>`
+   - E-commerce (product cards, banners, cart, reviews) → `npx shadcn@latest add https://ui.stackzero.co/r/<block>.json`
+   - Admin CRUD starter → clone `shadcn-admin` (full template, not composable)
    - Use the matched block's structure (layout, spacing, responsive breakpoints, component arrangement) as the new page skeleton. Modify freely based on actual needs, but start from a production-quality scaffold, not from scratch.
    - Only design from zero when no block matches. Even then, combine patterns from multiple blocks.
 
@@ -230,37 +331,44 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
 6. **Functional components**: Replace raw HTML modals, custom dropdowns, manual selects with Design Anchor functional primitives (`dialog`, `command`, `select`, `popover`, `tabs`). These provide focus trap, keyboard nav, and ARIA roles.
 7. **Effect enhancement**: Use MagicUI, Reactbits, or similar for micro-interactions and state transitions on Functional pages. Hero animations and showcase effects only on Showcase pages.
 
+8. **Build a token replacement map** for this page (see Token Identification and Replacement Execution, Step 1–3). Scan for hardcoded structural colors (`grep` for Tailwind color classes and hex values). Classify each match. Map hardcoded values to token equivalents.
+
 **Present the restructuring plan** before writing code:
    - Page nature: Functional or Showcase.
    - Matched block source (e.g., "shadcn/ui dashboard block as scaffold").
    - Current layout → proposed layout based on the matched block.
    - Presentational components failing quality criteria → what will be redesigned and how.
    - Functional components to install from Design Anchor (dialog, command, etc.).
+   - Token replacement map: hardcoded structural colors found → token equivalents to apply.
    - AI patterns to address (if any).
    - What stays: business logic, data bindings, API calls, state management.
-   - What changes: layout structure, component quality, visual design, section ordering, icon library.
+   - What changes: layout structure, component quality, visual design, section ordering, icon library, token compliance.
 
-7. **Wait for per-page confirmation.** The user confirms each page before restructuring begins.
-8. **Execute Phase 1 + Phase 2.** Rebuild the layout. Install functional primitives from Design Anchor. Freely design all presentational components. Add effect enhancements. Unify icons. Reorder sections by information priority.
+9. **Wait for per-page confirmation.** The user confirms each page before restructuring begins.
+
+10. **Execute Phase 1 + Phase 2.** Rebuild the layout. Install functional primitives from Design Anchor. Freely design all presentational components. Add effect enhancements. Unify icons. Reorder sections by information priority.
+
+11. **Execute token replacements** (Step 4). Replace all hardcoded structural colors with token references according to the confirmed map. Verify `tokens.json` values match the product's actual colors.
 
 **Phase 3 — Visual Styling:**
 
-9. **Apply the matched style prompt's visual layer** to the entire page:
-   - Color palette: primary actions, surface tints, accent backgrounds, status colors — using the prompt's specific hex values.
-   - Typography: font pairing, heading weights, letter spacing per the prompt's spec.
-   - Shadow/depth/border: per the prompt's surface approach.
-   - Signature elements: 2-3 distinctive visual choices from the prompt.
-   - Decorative touches: section background tints, accent borders, card styling, button treatments.
-   - Every component — whether from Design Anchor or freely designed — must reflect the product's visual personality.
-10. **Verify**: the page now looks professionally designed for this specific product, not like a generic template.
+12. **Apply the matched style prompt's visual layer** to the entire page:
+    - Color palette: primary actions, surface tints, accent backgrounds, status colors — using the prompt's specific hex values.
+    - Typography: font pairing, heading weights, letter spacing per the prompt's spec.
+    - Shadow/depth/border: per the prompt's surface approach.
+    - Signature elements: 2-3 distinctive visual choices from the prompt.
+    - Decorative touches: section background tints, accent borders, card styling, button treatments.
+    - Every component — whether from Design Anchor or freely designed — must reflect the product's visual personality.
+13. **Verify**: the page now looks professionally designed for this specific product, not like a generic template.
 
 **Post-change:**
 
-11. **Run checks:**
+14. **Run checks:**
     - `npx design-anchor sync`
     - `npx design-anchor audit`
-12. **Verify against Production Quality Bar** (from SKILL.md Design Guidance). Pay special attention to item #1 (visual polish).
-13. **Report what changed** with a Design Anchor self-check line.
+15. **Cross-page token consistency check** (Step 5). After all pages are processed, search `src/` for any remaining hardcoded instances of the project's primary color family. Zero structural uses should remain.
+16. **Verify against Production Quality Bar** (from SKILL.md Design Guidance). Pay special attention to item #1 (visual polish).
+17. **Report what changed** with a Design Anchor self-check line.
 
 ### Restructuring Rules
 
@@ -278,8 +386,9 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
 
 When the user chooses progressive optimization instead of layout restructuring:
 
-This path fixes structural color consistency without changing layout, components, or information architecture.
+This path fixes structural color consistency without changing layout, components, or information architecture. **Use the same Token Identification and Replacement Execution flow** (Step 1–5 above) — the only difference is that layout and presentational components stay unchanged.
 
+- Scan for hardcoded structural colors using `grep` (Step 1). Build a replacement map (Step 3). Execute replacements (Step 4). Cross-page consistency check (Step 5).
 - Align structural anchor colors only: primary interactive elements to the same `primary` token, CTA consistency, status color consistency, interactive state derivation. Do NOT replace decorative or page-specific colors with tokens.
 - Replace raw HTML dialogs/selects/dropdowns with Design Anchor functional primitives if they lack accessibility.
 - Consolidate mixed icon libraries to a single library.

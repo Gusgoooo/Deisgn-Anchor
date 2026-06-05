@@ -118,6 +118,8 @@ Color governance targets **structural anchors only** — the handful of colors t
 
 **How to distinguish:** An accidental inconsistency is when the same semantic concept (e.g., "primary button") appears in two different colors across pages. An intentional design choice is when a specific element has a unique color for a clear visual reason (e.g., a warm background on a welcome section, a gradient on a feature card). When in doubt, preserve the existing color — do not convert it to a token.
 
+**How to find and fix:** For existing products, use `grep` to scan for hardcoded Tailwind color classes (e.g., `bg-blue-600`, `text-gray-900`) and classify each match as structural (replace with token) or decorative (keep). Build a replacement map (e.g., `bg-indigo-600` → `bg-primary`), verify `tokens.json` has matching values, then execute. See `govern-existing-product.md` for the complete 5-step Token Identification and Replacement Execution flow.
+
 **Contrast and encoding:**
 - All text must meet WCAG 2.1 AA contrast ratio (4.5:1 for normal text, 3:1 for large text).
 - Color must not be the only way to convey information. Pair color with icons, text, or patterns.
@@ -309,7 +311,7 @@ Before any file changes:
 
 Allowed explicit confirmations include phrases such as `确认，开始重构`, `开始布局重构`, `restructure`, `渐进优化`, `只读审计`, or `我同意，开始`.
 
-When confirmed, use `references/govern-existing-product.md` as the execution prompt — it is self-contained with inline layout principles, component standards, and audit criteria. For layout restructuring, work one page at a time with per-page confirmation.
+When confirmed, use `references/govern-existing-product.md` as the execution prompt — it is self-contained with inline layout principles, component strategy, token identification/replacement execution, and audit criteria. For layout restructuring, work one page at a time with per-page confirmation. **Token replacement is not optional** — use the concrete scan-classify-map-replace flow in that file to find and fix every hardcoded structural color.
 
 ### Detailed Prompt To Tokens
 
@@ -423,12 +425,18 @@ Determine the page's spatial structure before touching any component or color. T
 
    **Other open-source block sources** (when shadcn doesn't cover the scenario):
 
-   | Scenario | Source |
-   |---|---|
-   | Admin CRUD, complete admin app | **shadcn-admin** (github: satnaing/shadcn-admin) |
-   | Extended patterns | **Kibo UI** (kibo-ui.com) |
-   | Landing / Showcase pages | **Launch UI** (launchuicomponents.com) |
-   | E-commerce pages | **Commerce UI** (github: stackzero-labs/ui) |
+   | Scenario | Source | Install |
+   |---|---|---|
+   | Extended patterns (kanban, gantt, timeline, file tree, carousel) | **Kibo UI** (kibo-ui.com) | `npx kibo-ui add <block-name>` |
+   | Landing / Showcase pages (hero, navbar, footer, pricing, FAQ, bento grid, CTA, stats, logos, testimonials) | **Launch UI** (launchuicomponents.com) | `npx shadcn@latest add @launchui/launchui` (base, run once) then `npx shadcn@latest add @launchui/<block>` |
+   | E-commerce (product cards, banners, cart, reviews, address forms, variant selectors) | **Commerce UI** (ui.stackzero.co) | `npx shadcn@latest add https://ui.stackzero.co/r/<block-name>.json` |
+   | Admin CRUD, complete admin starter | **shadcn-admin** (github: satnaing/shadcn-admin) | Clone template: `git clone https://github.com/satnaing/shadcn-admin.git` — full app, not composable blocks |
+
+   **Kibo UI blocks:** `npx kibo-ui add gantt`, `kanban`, `timeline`, `file-tree`, `carousel`, `sortable`, `dnd`, `code-block`, `media-player`, `data-table`, `charts`, `calendar`, and more. See kibo-ui.com for full list.
+
+   **Launch UI blocks:** `npx shadcn@latest add @launchui/hero`, `@launchui/navbar`, `@launchui/footer`, `@launchui/stats`, `@launchui/faq`, `@launchui/cta`, `@launchui/logos`, `@launchui/badge`, `@launchui/button`, `@launchui/card`, `@launchui/screenshot`, `@launchui/mockup`, `@launchui/glow`. Each has multiple variants — pick the variant that matches the page's layout needs.
+
+   **Commerce UI blocks:** `npx shadcn@latest add https://ui.stackzero.co/r/product-card-01-block.json` (product cards 01–13), `banner-01-block` through `banner-12-block`, `cart-01-block`, `review-01-block` through `review-10-block`, `product-variant-01-block` through `product-variant-05-block`, `address-01-block` through `address-03-block`.
 
    **This is not optional inspiration — it is the default workflow.** Always check if a shadcn block exists for the page type before designing from scratch. The block gives you a skeleton that would take significant effort to recreate — responsive sidebar collapse, proper scroll management, chart integration, data table layout — all production-quality out of the box.
 

@@ -1,6 +1,13 @@
 ---
 name: design-anchor
-description: "全流程设计 Skill——从第一个页面的设计落地到第一百个页面的设计一致性。AI 写代码前读取你的 token、组件规范和布局原则，写完后自动审计合规。新项目提取设计方向生成高完成度首页，已有产品逐页分析后重构布局、对齐 token 体系、替换不达标组件。覆盖 SaaS、AI 工具、管理后台、创意工具等所有产品类型。"
+description: "全流程设计 Skill。AI 写代码前读取 token、组件规范和布局原则，写完后自动审计。新项目提取设计方向生成首页，已有产品重构布局、对齐 token、替换不达标组件。"
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+compatibility:
+  - "Node.js >= 18"
+  - "design-anchor npm package"
 ---
 
 # Design Anchor Skill
@@ -362,15 +369,7 @@ Read `references/layout-governance.md` when building or modifying any page. Desi
 - Danger zones and destructive actions go at the bottom, visually separated.
 - Empty states, loading states, and error states are designed, not afterthoughts.
 
-If you encounter unsafe UI while editing, fix it in the current task and say:
-
-`Design Anchor 自动治理：已改为组件或语义 token。`
-
-If you encounter a layout that violates the quality principles in `layout-governance.md`, restructure it and say:
-
-`Design Anchor 布局治理：已根据页面用途重构布局。`
-
-Whenever UI changed, include a final line starting with `Design Anchor 自检` that covers layout quality, component reuse, icon consistency, token compliance, auto-fixes, unresolved confirmations, and sync/audit status.
+If you encounter unsafe UI while editing, fix it in the current task. If you encounter a layout that violates the quality principles, restructure it. Use the message templates defined in the Output Format section for all governance actions and self-checks.
 
 ## Command Router
 
@@ -386,6 +385,52 @@ Use the npm runtime for continuing work:
 - Audit project compliance: `npx design-anchor audit`
 - Upgrade local kit from the npm package: `npx design-anchor upgrade`
 - MCP server command for tools: `npx --no-install design-anchor mcp ./.anchor`
+
+## Output Format
+
+All UI-related responses must use these standardized message templates.
+
+### Probe / Pre-check
+
+```
+Design Anchor 预检：我会先判断项目成熟度和需求完整度；新页面会先匹配/抽取风格 token，已有完整产品会先征求你确认是否进入治理模式。
+```
+
+### Auto-governance (token / component fix during editing)
+
+```
+Design Anchor 自动治理：已改为组件或语义 token。
+```
+
+### Layout governance (layout restructured)
+
+```
+Design Anchor 布局治理：已根据页面用途重构布局。
+```
+
+### Component replacement
+
+```
+Design Anchor 组件治理：[原组件描述] → [新组件]。原因：[具体不达标项]。
+```
+
+Example: `Design Anchor 组件治理：自定义 div sidebar（无折叠、无分组、icon 混用）→ 标准 Sidebar 组件（可折叠、分组导航、统一 icon）。`
+
+### Self-check (required on every UI change)
+
+Every response that changes UI must end with a `Design Anchor 自检` line covering:
+
+- Layout quality (purpose-layout fit, information hierarchy)
+- Component reuse (governed components used, replacements made)
+- Icon consistency (single library, uniform size)
+- Token compliance (no hardcoded colors, primary aligned, states derived)
+- Auto-fixes applied
+- Unresolved items requiring user confirmation
+- Sync / audit status
+
+```
+Design Anchor 自检：布局 ✓ | 组件 ✓ | icon ✓ | token ✓ | 自动修复 0 | 待确认 0 | sync ✓ audit ✓
+```
 
 ## References
 

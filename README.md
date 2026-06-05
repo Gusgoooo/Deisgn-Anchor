@@ -2,20 +2,15 @@
 
 [English](./README.en.md)
 
+**全流程设计 Skill——适合长期项目的设计 skill**
+
 <p align="center">
   <img src="https://img.shields.io/npm/v/design-anchor?style=flat-square&color=0a0a0a" alt="npm" />
   <img src="https://img.shields.io/badge/Claude_Code-Agent_Skill-6B5CE7?style=flat-square" alt="Claude Code" />
-  <img src="https://img.shields.io/badge/OpenAI-Agent_Metadata-0a0a0a?style=flat-square" alt="OpenAI metadata" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square&color=0a0a0a" alt="MIT" />
 </p>
 
-<p align="center">
-  <strong>把 AI UI 从第一屏的灵感，固定成第一百屏的秩序。</strong>
-</p>
-
-Design Anchor 是 [`design-anchor`](https://www.npmjs.com/package/design-anchor) npm 运行时的 AI Skill 层。它不只是让 AI 生成一个好看的页面，而是让 AI 在长期项目里持续读取同一套 token、组件边界、布局原则和质量门槛。
-
-一句话：**开始时帮你定设计方向，维护时帮你守住一致性，审查时帮你发现漂移，修改时帮你整页治理而不伤业务逻辑。**
+从第一个页面的设计落地，到第一百个页面的设计一致性，Design Anchor 覆盖设计的完整生命周期。不是生成完就不管了——是持续守护你的设计意图。
 
 ---
 

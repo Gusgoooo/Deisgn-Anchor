@@ -1,16 +1,28 @@
-# Design Anchor
+<div align="center">
 
-[English](./README.en.md)
+# Design Anchor
 
 **全流程设计 Skill——适合长期项目的设计 skill**
 
-<p align="center">
+<br/>
+
+<p>
   <img src="https://img.shields.io/npm/v/design-anchor?style=flat-square&color=0a0a0a" alt="npm" />
   <img src="https://img.shields.io/badge/Claude_Code-Agent_Skill-6B5CE7?style=flat-square" alt="Claude Code" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square&color=0a0a0a" alt="MIT" />
 </p>
 
-从第一个页面的设计落地，到第一百个页面的设计一致性，Design Anchor 覆盖设计的完整生命周期。不是生成完就不管了——是持续守护你的设计意图。
+<br/>
+
+<h3>从第一个页面的设计落地，到第一百个页面的设计一致性<br/>Design Anchor 覆盖设计的完整生命周期</h3>
+
+<p>不是生成完就不管了——是持续守护你的设计意图。</p>
+
+<br/>
+
+[English](./README.en.md)
+
+</div>
 
 ---
 

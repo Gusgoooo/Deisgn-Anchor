@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Anchor"
-  short_description: "B2B UI generation and governance"
-  default_prompt: "Use $design-anchor to classify the project and request: generate a polished first B2B page from detailed or matched style prompts, or if the project is already mature, offer consent-gated existing-product governance with risk disclosure, read-only audit, governance plan, or explicitly confirmed first-stage changes. Keep UI work governed by tokens, @design components, specs, sync, MCP, and audit."
+  short_description: "Product UI generation and design governance"
+  default_prompt: "Use $design-anchor to classify the project and request: generate a polished first page from detailed or matched style prompts, or if the project is already mature, offer layout restructuring as the default governance mode (with progressive optimization and read-only audit as alternatives). Keep UI work governed by Design Anchor tokens, @design components, layout quality principles, specs, sync, MCP, and audit. Covers all product types: B2B, SaaS, AI tools, creative tools, developer tools."

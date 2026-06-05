@@ -1,6 +1,6 @@
-# B2B Design Prompt Pool
+# Design Prompt Pool
 
-This folder is an extensible internal prompt pool for Design Anchor Skill. Use it when the user's own design prompt is incomplete.
+This folder is an extensible internal prompt pool for Design Anchor Skill. Use it when the user's own design prompt is incomplete. The prompts cover all product types — B2B, SaaS, AI tools, developer tools, and creative tools.
 
 The skill maintainer can expand this pool by dropping markdown files into:
 

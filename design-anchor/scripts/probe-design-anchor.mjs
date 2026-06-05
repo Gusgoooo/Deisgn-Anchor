@@ -166,6 +166,133 @@ function hasKnownUiDependency(pkg) {
   ].some((name) => names.has(name));
 }
 
+const KNOWN_ICON_LIBRARIES = [
+  "lucide-react",
+  "@heroicons/react",
+  "react-icons",
+  "@fortawesome/react-fontawesome",
+  "@fortawesome/free-solid-svg-icons",
+  "@fortawesome/free-regular-svg-icons",
+  "@phosphor-icons/react",
+  "@tabler/icons-react",
+  "@mui/icons-material",
+  "@ant-design/icons",
+];
+
+function detectIconLibraries(pkg) {
+  const names = dependencyNames(pkg);
+  return KNOWN_ICON_LIBRARIES.filter((lib) => names.has(lib));
+}
+
+function detectLayoutSignals(pkg) {
+  const names = dependencyNames(pkg);
+  const hasLayoutComponents = has("src/components/layout")
+    || has("src/components/Layout")
+    || has("src/layouts")
+    || has("src/app/layout.tsx")
+    || has("src/app/layout.jsx")
+    || has("app/layout.tsx")
+    || has("app/layout.jsx");
+  const hasSidebarComponent = has("src/components/Sidebar.tsx")
+    || has("src/components/sidebar.tsx")
+    || has("src/components/Sidebar/index.tsx")
+    || has("src/components/sidebar/index.tsx")
+    || has("src/components/layout/Sidebar.tsx")
+    || has("src/components/layout/sidebar.tsx");
+  const hasShellComponent = has("src/components/Shell.tsx")
+    || has("src/components/shell.tsx")
+    || has("src/components/AppShell.tsx")
+    || has("src/components/app-shell.tsx");
+  const hasGridLibrary = names.has("react-grid-layout")
+    || names.has("@dnd-kit/core")
+    || names.has("react-resizable-panels");
+
+  return {
+    hasLayoutComponents,
+    hasSidebarComponent,
+    hasShellComponent,
+    hasGridLibrary,
+  };
+}
+
+function detectFormLibrary(pkg) {
+  const names = dependencyNames(pkg);
+  if (names.has("react-hook-form")) return "react-hook-form";
+  if (names.has("formik")) return "formik";
+  if (names.has("@tanstack/react-form")) return "@tanstack/react-form";
+  return null;
+}
+
+function detectTableLibrary(pkg) {
+  const names = dependencyNames(pkg);
+  if (names.has("@tanstack/react-table")) return "@tanstack/react-table";
+  if (names.has("react-table")) return "react-table";
+  if (names.has("ag-grid-react")) return "ag-grid-react";
+  if (names.has("@mui/x-data-grid")) return "@mui/x-data-grid";
+  return null;
+}
+
+function detectFramework(pkg) {
+  const names = dependencyNames(pkg);
+  if (names.has("next")) return "next";
+  if (names.has("nuxt")) return "nuxt";
+  if (names.has("@remix-run/react") || names.has("remix")) return "remix";
+  if (names.has("vite") && names.has("react")) return "vite-react";
+  if (names.has("@sveltejs/kit")) return "sveltekit";
+  if (names.has("svelte")) return "svelte";
+  if (names.has("vue")) return "vue";
+  if (names.has("astro")) return "astro";
+  if (names.has("react")) return "react";
+  return null;
+}
+
+function detectComponentLibrary(pkg) {
+  const names = dependencyNames(pkg);
+  const libs = [];
+  if (names.has("@radix-ui/react-dialog") || names.has("@radix-ui/react-slot")) libs.push("radix-ui");
+  if (names.has("@mui/material")) libs.push("mui");
+  if (names.has("@chakra-ui/react")) libs.push("chakra-ui");
+  if (names.has("antd")) libs.push("antd");
+  if (names.has("@mantine/core")) libs.push("mantine");
+  if (names.has("@headlessui/react")) libs.push("headless-ui");
+  if (names.has("react-aria-components")) libs.push("react-aria");
+  if (has("components.json")) libs.push("shadcn-ui");
+  return libs;
+}
+
+function detectStateManagement(pkg) {
+  const names = dependencyNames(pkg);
+  if (names.has("zustand")) return "zustand";
+  if (names.has("@reduxjs/toolkit") || names.has("redux")) return "redux";
+  if (names.has("jotai")) return "jotai";
+  if (names.has("recoil")) return "recoil";
+  if (names.has("mobx")) return "mobx";
+  if (names.has("valtio")) return "valtio";
+  return null;
+}
+
+function detectValidationLibrary(pkg) {
+  const names = dependencyNames(pkg);
+  if (names.has("zod")) return "zod";
+  if (names.has("yup")) return "yup";
+  if (names.has("joi")) return "joi";
+  if (names.has("@sinclair/typebox")) return "typebox";
+  return null;
+}
+
+function detectCssStrategy(pkg) {
+  const names = dependencyNames(pkg);
+  const strategies = [];
+  if (names.has("tailwindcss")) strategies.push("tailwind");
+  if (names.has("styled-components")) strategies.push("styled-components");
+  if (names.has("@emotion/react") || names.has("@emotion/styled")) strategies.push("emotion");
+  if (names.has("sass") || names.has("node-sass")) strategies.push("sass");
+  if (names.has("@vanilla-extract/css")) strategies.push("vanilla-extract");
+  if (names.has("@stitches/react")) strategies.push("stitches");
+  if (strategies.length === 0 && has("src")) strategies.push("css-modules-or-plain");
+  return strategies;
+}
+
 function projectSignals(pkg) {
   const uiExtensions = [".tsx", ".jsx", ".vue", ".svelte"];
   const styleExtensions = [".css", ".scss", ".sass", ".less"];
@@ -213,6 +340,15 @@ const isSourceRepo = pkg?.name === "design-anchor"
   && has("bin/anchor.mjs")
   && has("src/anchor-portal");
 const signals = projectSignals(pkg);
+const iconLibraries = detectIconLibraries(pkg);
+const layoutSignals = detectLayoutSignals(pkg);
+const framework = detectFramework(pkg);
+const componentLibraries = detectComponentLibrary(pkg);
+const formLibrary = detectFormLibrary(pkg);
+const tableLibrary = detectTableLibrary(pkg);
+const stateManagement = detectStateManagement(pkg);
+const validationLibrary = detectValidationLibrary(pkg);
+const cssStrategies = detectCssStrategy(pkg);
 
 const result = {
   target,
@@ -245,6 +381,16 @@ const result = {
   hasCursorSelfcheckRule: has(".cursor/rules/anchor-selfcheck.mdc"),
   mcpConfigFiles: mcpConfigFiles(),
   hasPortableMcpConfig: hasPortableMcpConfig(),
+  framework,
+  componentLibraries,
+  cssStrategies,
+  formLibrary,
+  tableLibrary,
+  stateManagement,
+  validationLibrary,
+  iconLibraries,
+  hasMultipleIconLibraries: iconLibraries.length > 1,
+  layoutSignals,
   scripts: {
     syncAnchor: pkg?.scripts?.["sync:anchor"] || null,
     anchorAudit: pkg?.scripts?.["anchor:audit"] || null,
@@ -261,7 +407,11 @@ if (isSourceRepo) {
   }
 
   if (result.recommendedMode === "offer-existing-product-governance") {
-    result.recommendedNextSteps.push("This looks like an existing product. Offer `只读审计`, `生成治理计划`, or `开始第一阶段治理`; do not modify files until the user explicitly confirms the governance mode and acknowledges risk.");
+    result.recommendedNextSteps.push("This looks like an existing product. Offer `布局重构`（recommended）, `渐进优化`, or `只读审计`; do not modify files until the user explicitly confirms the governance mode.");
+  }
+
+  if (result.hasMultipleIconLibraries) {
+    result.recommendedNextSteps.push(`Multiple icon libraries detected: ${iconLibraries.join(", ")}. Recommend consolidating to a single library (preferably lucide-react).`);
   }
 
   if (!result.designAnchorDependency && !result.designAnchorNodeModuleVersion) {
@@ -296,6 +446,27 @@ if (isSourceRepo) {
 
   if (!needsBackgroundSync && result.hasInstalledComponents) {
     result.recommendedNextSteps.push("Design Anchor appears ready; continue with `@design` components, semantic tokens, `sync`, and `audit` after UI changes.");
+  }
+
+  if (componentLibraries.length > 1) {
+    result.recommendedNextSteps.push(`Multiple component libraries detected: ${componentLibraries.join(", ")}. Consider consolidating to reduce bundle size and ensure consistent styling.`);
+  }
+
+  if (cssStrategies.length > 1 && cssStrategies.includes("tailwind")) {
+    const others = cssStrategies.filter((s) => s !== "tailwind");
+    result.recommendedNextSteps.push(`Mixed CSS strategies: Tailwind + ${others.join(", ")}. Prefer Tailwind with semantic token classes for Design Anchor governed components.`);
+  }
+
+  if (signals.projectMaturity !== "new-or-small" && !formLibrary) {
+    result.recommendedNextSteps.push("No form library detected in an established project. Recommend react-hook-form + zod for governed form components.");
+  }
+
+  if (signals.projectMaturity !== "new-or-small" && !tableLibrary && signals.componentFiles > 5) {
+    result.recommendedNextSteps.push("No table library detected. Recommend @tanstack/react-table for governed data tables with sort, filter, and pagination.");
+  }
+
+  if (layoutSignals.hasLayoutComponents && !layoutSignals.hasSidebarComponent && !layoutSignals.hasShellComponent) {
+    result.recommendedNextSteps.push("Layout components exist but no sidebar or app shell detected. The product may lack a consistent navigation structure.");
   }
 }
 

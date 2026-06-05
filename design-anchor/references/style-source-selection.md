@@ -2,7 +2,7 @@
 
 Read this when the user's request is not complete enough to extract a design system from their own words.
 
-The goal is not to show a preset picker. The goal is to quickly infer a suitable B2B style direction, pull the matching internal prompt file, translate it into Design Anchor tokens, and start building a polished first page.
+The goal is not to show a preset picker. The goal is to quickly infer a suitable style direction, pull the matching internal prompt file, translate it into Design Anchor tokens, and start building a polished first page.
 
 ## Completeness Heuristic
 
@@ -23,7 +23,7 @@ Treat it as incomplete when:
 
 Ask at most one short question before matching. Use user-facing words, not preset names:
 
-`我先给你匹配一个适合的 B2B 风格方向。你更想要：高效紧凑、稳重可信、清爽友好、深色专注，还是实时指挥感？`
+`我先给你匹配一个适合的风格方向。你更想要：高效紧凑、稳重可信、清爽友好、深色专注，还是实时指挥感？`
 
 If the user already gave enough product context, you may infer without asking and say:
 

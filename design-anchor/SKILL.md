@@ -1,11 +1,11 @@
 ---
 name: design-anchor
-description: Use when a task touches B2B/SaaS/admin UI, product screens, design prompts, themes, design tokens, component specs, Design Anchor governance, @design components, MCP, sync, audit, or long-term AI coding consistency. Starts by classifying the project and request: detailed prompts are extracted into tokens, incomplete requests are matched to an internal B2B style prompt for a polished first page, and mature existing products are offered a consent-gated governance mode.
+description: Use when a task touches product UI, design prompts, themes, design tokens, component specs, Design Anchor governance, @design components, MCP, sync, audit, layout restructuring, or long-term AI coding consistency. Covers all product types including B2B/SaaS, AI tools, creative tools, and developer tools. Starts by classifying the project and request: detailed prompts are extracted into tokens, incomplete requests are matched to an internal style prompt for a polished first page, and mature existing products are offered layout restructuring as the default governance mode.
 ---
 
 # Design Anchor Skill
 
-Use this skill as the AI entry layer for Design Anchor. Its first job is to classify the situation: create a polished B2B first page for new or incomplete products, extract tokens from detailed design prompts, or offer a consent-gated governance mode for mature existing products. Its second job is to make the work governable through Design Anchor tokens, components, specs, rules, sync, MCP, and audit.
+Use this skill as the AI entry layer for Design Anchor. Its first job is to classify the situation: create a polished first page for new or incomplete products, extract tokens from detailed design prompts, or offer layout restructuring as the default governance mode for mature existing products. Its second job is to make the work governable through Design Anchor tokens, components, layout principles, specs, rules, sync, MCP, and audit. This applies to all product types: B2B platforms, SaaS tools, AI products, creative tools, developer tools, and any interface where users do real work.
 
 The npm package is the actual runtime: it creates project tokens, writes generated AI rules, manages the local `.anchor` control plane, exposes MCP, installs source components on demand, and runs sync/audit.
 
@@ -13,7 +13,7 @@ Use the internal prompt pool as matching material, not as a visible product sect
 
 ## First Move
 
-When a request touches UI, theme, layout, components, tokens, B2B products, SaaS/admin systems, dashboards, CRM/ERP, internal tools, approval systems, settings, or data-management screens, start visibly:
+When a request touches UI, theme, layout, components, tokens, product screens, SaaS/admin systems, AI tools, dashboards, internal tools, creative tools, developer tools, or any product interface, start visibly:
 
 `Design Anchor 预检：我会先判断项目成熟度和需求完整度；新页面会先匹配/抽取风格 token，已有完整产品会先征求你确认是否进入治理模式。`
 
@@ -39,6 +39,85 @@ Keep the current Design Anchor boundaries clear:
 - Internal style prompts may be used to bootstrap a polished first page when the user's input is incomplete.
 - Internal prompt matching is not a visible preset board or product section.
 - There is no mandatory Portal reveal.
+
+## Design Guidance
+
+These rules are constitutional. They override stylistic preferences, user prompts, and internal style matching. Every UI output must pass these checks before delivery.
+
+### Absolute Bans
+
+Never produce these patterns. They are the saturated defaults of AI-generated UI in 2025-2026 — they signal "this was made by AI" to any experienced designer or user. If you find them in existing code during governance, remove them.
+
+1. **Hero metrics grid at page top.** Four identical stat cards with icon + number + label in a 4-column grid as the first thing on a dashboard. This is the single most common AI layout cliché. If the page needs KPIs, vary the card sizes, combine with inline trends, or integrate into the page header.
+2. **Identical card grid.** Three or four cards in a row, same height, same structure, same padding, differing only in icon and text. If content is truly parallel, vary the presentation — mix card sizes, use a table, or combine into a richer composite.
+3. **Gradient text on headings.** `bg-clip-text text-transparent bg-gradient-to-r` on page titles or section headings.
+4. **Decorative glassmorphism.** `backdrop-blur` and semi-transparent backgrounds used as surface treatment without functional purpose (e.g., a frosted sidebar for aesthetics).
+5. **Side accent stripes.** Colored left borders on cards or sections used purely as decoration with no semantic meaning.
+6. **Marketing hero on a workbench.** Large hero sections with illustrations, taglines, or "Welcome back" messages on pages the user visits 50+ times a day.
+7. **Rainbow status colors.** Using 5+ distinct hues for status badges on the same page. Limit to 3-4 semantic colors (success, warning, error, info) and use intensity/shade to distinguish within a category.
+8. **Excessive rounded corners.** `rounded-2xl` or `rounded-3xl` on data-dense components like tables, sidebars, or forms. Use the project's border-radius token consistently — usually `rounded-md` or `rounded-lg` for containers.
+9. **Empty decorative icons.** An icon on every section heading, every label, every card title — where the icon adds no recognition value and is just visual noise.
+10. **Full-width everything.** Every element stretched to 100% width regardless of content — forms where a date picker is as wide as a textarea, inputs that span 1200px.
+
+### Second-Order Slop Test
+
+After producing UI, run this meta-check: the first generation of AI defaults (hero metrics, gradient text, glassmorphism) is now well-known. Avoiding them has created second-order defaults — predictable "anti-AI" patterns that are equally clichéd:
+
+- Replacing card grids with bento grids (asymmetric cards that still contain the same shallow content).
+- Replacing gradient text with animated gradient borders.
+- Replacing stat cards with oversized single-number displays.
+- Replacing sidebar navigation with a floating command palette as the only navigation.
+- Using extreme minimalism (nearly invisible borders, 2px text, ghost buttons everywhere) as a reaction against "AI-looking" UI.
+
+If your output matches a second-order default, redesign. The goal is to serve the user's task, not to look anti-AI.
+
+### Color
+
+- All text must meet WCAG 2.1 AA contrast ratio (4.5:1 for normal text, 3:1 for large text). No exceptions.
+- Never use gray text lighter than `text-muted-foreground` token. If a token does not exist, create one that passes contrast.
+- Do not hardcode hex colors. Use semantic token classes (`bg-primary`, `text-foreground`, `border-border`).
+- Dark mode is not "invert all colors." Dark surfaces need adjusted contrast ratios, reduced saturation, and elevated surface layers.
+- Status colors are semantic: success (green), warning (amber/yellow), error (red), info (blue). Do not invent new color categories.
+
+### Typography
+
+- Body text line width: 55-75 characters (roughly `max-w-prose`). Never let body text run full-width on large screens.
+- Heading hierarchy must be visually obvious without reading the text. If h2 and h3 look the same, the hierarchy fails.
+- Maximum 2 font families per project. One is usually enough.
+- Never use ALL CAPS for body text or long labels. Acceptable only for short badges, overlines, or button text.
+- Font sizes below 12px are unreadable for most users. Do not go smaller.
+
+### Interaction
+
+- Every clickable element must have a visible hover state and focus state.
+- Destructive actions (delete, remove, reset) must be visually distinct (destructive variant) and require confirmation for irreversible operations.
+- Loading states must be visible — never leave the user wondering if something is happening. Use skeleton screens for content areas, spinners for actions.
+- Disabled elements must look disabled and explain why (tooltip or adjacent text).
+- Dropdown menus and popovers must handle viewport overflow — if there is not enough space below, open above.
+
+### Accessibility
+
+- All form inputs must have associated `<label>` elements — no placeholder-only labels.
+- All images must have `alt` text — empty `alt=""` only for purely decorative images.
+- Interactive elements must be keyboard-reachable (tab order) and operable (enter/space).
+- Focus indicators must be visible. Do not remove the default focus ring without providing a custom one.
+- `prefers-reduced-motion` must be respected — skip or simplify animations when the user requests it.
+- Color must not be the only way to convey information. Pair color with icons, text, or patterns.
+
+### Production Quality Bar
+
+Every UI output must meet this minimum bar before delivery. If any item fails, fix it before reporting the task as complete.
+
+1. All text passes WCAG AA contrast.
+2. Every interactive element has hover and focus states.
+3. Empty state, loading state, and error state are handled — not blank areas or console errors.
+4. Layout does not break at common viewport widths (320px, 768px, 1024px, 1440px).
+5. No hardcoded colors — all colors use semantic tokens.
+6. No mixed icon libraries.
+7. All form fields have visible labels.
+8. Destructive actions are visually distinguished and gated.
+9. Keyboard navigation works for all interactive elements.
+10. Page renders without layout shift (no elements jumping after load).
 
 ## Activation Contract
 
@@ -89,13 +168,13 @@ Classify the project and request before generating:
 - **Incomplete product request**: names a product, page, or workflow but does not provide enough style direction.
 - **Incomplete style request**: gives mood or aesthetics but does not define the product workflow.
 
-For a mature existing product, do not start rewriting or normalizing UI automatically. Read `references/govern-existing-product.md`, explain risk, and ask for explicit confirmation. Default to read-only audit.
+For a mature existing product, do not start rewriting or normalizing UI automatically. Read `references/govern-existing-product.md` and recommend layout restructuring as the default. Ask for explicit confirmation.
 
 For a detailed design prompt, do not ask style-matching questions. Save the prompt and run token extraction.
 
 For incomplete input, ask one concise heuristic question when needed. Prefer choices that sound like product direction, not preset names:
 
-`我先给你匹配一个适合的 B2B 风格方向。你更想要：高效紧凑、稳重可信、清爽友好、深色专注，还是实时指挥感？`
+`我先给你匹配一个适合的风格方向。你更想要：高效紧凑、稳重可信、清爽友好、深色专注，还是实时指挥感？`
 
 If the user does not answer or the task should move fast, infer from product context and continue.
 
@@ -103,22 +182,22 @@ Read `references/style-source-selection.md` before matching an internal style pr
 
 ### Mature Existing Product Governance
 
-Use this when the project appears complete or already has substantial product UI. This mode is for governing an existing product, not creating a new first page.
+Use this when the project appears complete or already has substantial product UI. This mode governs an existing product with layout restructuring as the default recommendation.
 
 Before any file changes:
 
-1. Run only read-only inspection.
-2. Explain the risk clearly: component organization, token naming, style references, import paths, and UI behavior may change.
-3. Recommend a new git branch and the read-only audit option first.
+1. Run read-only inspection including layout analysis, icon audit, and information architecture assessment.
+2. Present the situation with confidence: the product will benefit from layout restructuring, not just token fixes.
+3. Recommend a new git branch.
 4. Offer exactly these choices:
+   - `布局重构`（推荐）: read each page, classify screen type, restructure layout, replace components, unify icons, reorder information architecture. Preserves all business logic and data bindings.
+   - `渐进优化`: only fix token compliance, import paths, and raw primitive replacement. Keeps existing layout unchanged.
    - `只读审计`: scan and report only; no file changes.
-   - `生成治理计划`: produce a phased plan; no file changes.
-   - `开始第一阶段治理`: make limited first-stage changes only after explicit confirmation.
 5. Wait for the user to confirm. Do not treat silence, vague approval, or a different feature request as consent.
 
-Allowed explicit confirmations include phrases such as `确认，开始治理`, `开始第一阶段治理`, `govern`, or `我同意风险，开始`.
+Allowed explicit confirmations include phrases such as `确认，开始重构`, `开始布局重构`, `restructure`, `渐进优化`, `只读审计`, or `我同意，开始`.
 
-When confirmed, use `references/govern-existing-product.md` as the execution prompt. Keep each stage small; token remapping, component normalization, and business-code rewrites should remain separate confirmation gates.
+When confirmed, use `references/govern-existing-product.md` as the execution prompt — it is self-contained with inline layout principles, component standards, and audit criteria. For layout restructuring, work one page at a time with per-page confirmation.
 
 ### Detailed Prompt To Tokens
 
@@ -127,7 +206,7 @@ Use this when the user provides a design prompt, brand direction, visual recipe,
 1. Ensure the runtime is installed and synced.
 2. Save the prompt into a project-local markdown file, such as `design-prompt.md` or `.anchor/design-prompt-source.md`.
 3. Run `npx design-anchor theme <prompt-file.md>`.
-4. Treat the extracted aesthetic as a light layer for B2B density, hierarchy, rhythm, surface tone, and atmosphere.
+4. Treat the extracted aesthetic as a light layer for density, hierarchy, rhythm, surface tone, and atmosphere.
 5. Keep component specs, semantic tokens, accessibility, and product workflow stronger than the prompt.
 6. Run `npx design-anchor sync`; run `npx design-anchor audit` when UI changed.
 
@@ -135,7 +214,7 @@ Read `references/style-prompt-guidance.md` before using a style prompt.
 
 ### Incomplete Request To Matched Prompt
 
-Use this when the user gives a vague product need, such as `做一个 CRM 后台`, `做个审批系统`, `做个数据看板`, `做一个 SaaS 管理台`, or only provides partial product context.
+Use this when the user gives a vague product need, such as `做一个 CRM 后台`, `做个审批系统`, `做个数据看板`, `做一个 AI 助手`, `做个聊天工具`, or only provides partial product context.
 
 1. Infer roles, objects, workflows, page type, and density from the request.
 2. Use heuristic Q&A only if the missing answer would change the style or workflow.
@@ -148,18 +227,19 @@ Use this when the user gives a vague product need, such as `做一个 CRM 后台
 9. Generate the first polished page using extracted tokens, product context, `@design` components, and on-demand components.
 10. Run `npx design-anchor sync`; run `npx design-anchor audit` when UI changed.
 
-### First B2B Page
+### First Product Page
 
-Use this when the user asks for a B2B product, admin system, dashboard, SaaS app, CRM, ERP, internal tool, approval system, settings area, reporting view, or monitoring console.
+Use this when the user asks for any product interface: admin system, dashboard, SaaS app, AI assistant, chat tool, CRM, internal tool, developer tool, creative tool, monitoring console, or any functional product screen.
 
-1. Infer roles, objects, workflows, page type, and density from the request.
+1. Infer roles, objects, workflows, page purpose, and density from the request.
 2. Ensure there is an active style source: either the user's detailed prompt or an internally matched prompt.
 3. Build the actual usable screen or flow, not a marketing landing page.
-4. Make the first page feel impressive through hierarchy, density, layout rhythm, meaningful data, state design, and interaction affordances.
-5. Compose from existing `@design` components and add only the missing components.
-6. Keep the look B2B-appropriate: polished and memorable, but not decorative-heavy.
+4. Read `references/layout-governance.md` and apply layout quality principles. Design the best layout for this page's purpose — do not force-fit a template.
+5. Make the first page feel impressive through information architecture, density, layout rhythm, meaningful data, state design, and interaction affordances.
+6. Compose from existing `@design` components and add only the missing components.
+7. Keep the look purposeful: polished and memorable, but not decorative-heavy.
 
-Read `references/b2b-product-context.md` before creating B2B product screens.
+Read `references/b2b-product-context.md` before creating product screens.
 
 ### Design System Inspection
 
@@ -167,7 +247,9 @@ Use Portal only when the user asks to view, tune, inspect, audit, or document th
 
 ## UI Coding Rules
 
-Before writing UI, inspect `@design`, `src/components/anchor-ui`, project tokens, and component specs when available.
+Before writing UI, inspect `@design`, `src/components/anchor-ui`, project tokens, component specs, and the current page layout when available.
+
+### Component Rules
 
 - Prefer imports from `@design`; otherwise use `@/components/anchor-ui`.
 - Do not import component implementations from `.anchor/` or `node_modules/design-anchor/`.
@@ -178,11 +260,75 @@ Before writing UI, inspect `@design`, `src/components/anchor-ui`, project tokens
 - Keep component implementation changes in `src/components/anchor-ui/`.
 - Keep token edits in `src/design-tokens/tokens.json`, then sync generated CSS/rules.
 
+### Component Replacement Rules (Enforced)
+
+When encountering substandard components during editing or governance, **do not report — replace immediately.** Read `references/layout-governance.md` Component Quality Standards section for the full replacement specification.
+
+Substandard means: raw HTML where a governed component exists, visually broken or inconsistent implementations, components that violate accessibility or interaction conventions, or custom implementations that duplicate what Design Anchor already provides.
+
+**All component replacements must go through Design Anchor.** Do not introduce external component libraries directly — Design Anchor is the single entry point for governed components.
+
+Replacement flow:
+1. Check if the component already exists in `@design` or `src/components/anchor-ui/`.
+2. If not, run `npx design-anchor add <component>` to install from Design Anchor's component registry.
+3. If Design Anchor does not have the component yet, write a new one in `src/components/anchor-ui/` that conforms to Design Anchor conventions (composable API, semantic token styling, accessibility). Then run `npx design-anchor sync` to register it and generate its spec.
+4. **Never** install Radix, cmdk, @tanstack/react-table, or other UI primitives as direct project dependencies just because a component needs them. Design Anchor bundles its own primitives — the `add` command handles the dependency chain.
+
+Key components that must meet Design Anchor quality standards — replace on sight if they do not:
+
+- **Sidebar / Navigation**: `npx design-anchor add sidebar`. Must be collapsible, grouped sections, active state, consistent icons, responsive drawer on mobile.
+- **Data Table**: `npx design-anchor add table`. Must have sortable headers, row selection, status badges, row action dropdown (not inline icons), pagination, empty/loading states.
+- **Form fields**: `npx design-anchor add input select textarea checkbox switch`. Must have visible labels, inline validation, section grouping, sticky submit bar.
+- **Dialog / Modal**: `npx design-anchor add dialog alert-dialog`. Must have focus trap, escape-to-close, overlay, accessible title.
+- **Command Palette**: `npx design-anchor add command`. Must have Cmd/Ctrl+K, keyboard nav, fuzzy filtering, grouped results.
+- **Tabs**: `npx design-anchor add tabs`. Must have keyboard arrow navigation, active indicator, ARIA roles.
+- **App Shell**: `npx design-anchor add sidebar` + project layout in `src/components/anchor-ui/app-shell.tsx`. Must provide consistent header + sidebar + content structure with responsive collapse.
+
+After every component replacement, verify with `npx design-anchor audit` and check the component spec at `.anchor/src/anchor/schema/components/`.
+
+When replacing:
+
+`Design Anchor 组件治理：[component] 不符合规范，已通过 design-anchor add 替换为标准实现。`
+
+### Layout Rules
+
+Read `references/layout-governance.md` when building or modifying any page. Design the best layout for each page's purpose — do not force-fit templates.
+
+- Identify the page's primary user task before choosing a layout. The layout serves the task.
+- Primary content gets primary space. A data table that is the page's purpose should not be squeezed by a wide sidebar or tall header. A chat interface should not waste space on persistent sidebars.
+- High-frequency actions go where the user can reach them without scrolling.
+- Status is always visible — the user should never need to click to discover current state.
+- Related information stays together in the same visual group.
+- Match density to task: monitoring is dense, content consumption is focused, creative workspaces minimize chrome.
+- Use progressive disclosure: show the summary, let the user drill down.
+- Consistent shell across pages: sidebar, header, and content area should not shift between pages unless there is a deliberate mode change.
+- Use reference examples in `layout-governance.md` as inspiration, not as mandatory patterns.
+
+### Icon Rules
+
+- One icon library per project. Recommend `lucide-react` for new projects.
+- Consistent size: pick a base size (16, 20, or 24px) and use it everywhere except explicit variants.
+- Do not mix outline and filled icon styles in the same context.
+- Icon + label for primary actions; icon-only for secondary/repeated actions with tooltips.
+- Remove decorative icons that add no recognition value.
+
+### Information Architecture Rules
+
+- Section ordering follows user workflow priority, not data model structure.
+- Page header contains identity (title, status) and primary actions — nothing else.
+- Filters and search are always visible on list pages, never hidden behind toggles.
+- Danger zones and destructive actions go at the bottom, visually separated.
+- Empty states, loading states, and error states are designed, not afterthoughts.
+
 If you encounter unsafe UI while editing, fix it in the current task and say:
 
 `Design Anchor 自动治理：已改为组件或语义 token。`
 
-Whenever UI changed, include a final line starting with `Design Anchor 自检` that covers component reuse, token compliance, auto-fixes, unresolved confirmations, and sync/audit status.
+If you encounter a layout that violates the quality principles in `layout-governance.md`, restructure it and say:
+
+`Design Anchor 布局治理：已根据页面用途重构布局。`
+
+Whenever UI changed, include a final line starting with `Design Anchor 自检` that covers layout quality, component reuse, icon consistency, token compliance, auto-fixes, unresolved confirmations, and sync/audit status.
 
 ## Command Router
 
@@ -205,7 +351,8 @@ Read only what the task needs:
 
 - `references/project-contract.md` before installs, file-boundary decisions, source-vs-consumer detection, or component/token writes.
 - `references/govern-existing-product.md` before offering or executing governance for a mature existing product.
-- `references/b2b-product-context.md` before creating B2B product screens.
+- `references/layout-governance.md` before analyzing, auditing, or restructuring any page layout. Contains layout quality principles, reference examples for common page types (including AI product interfaces), icon governance rules, and information architecture principles.
+- `references/b2b-product-context.md` before creating product screens. Covers all product types including AI tools, creative tools, and developer tools.
 - `references/style-source-selection.md` before matching incomplete input to an internal style prompt.
 - `references/b2b-design-prompt-pool.md` when selecting an internal prompt.
 - `references/style-prompt-guidance.md` before turning a user style prompt into tokens.

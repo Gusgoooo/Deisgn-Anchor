@@ -1,6 +1,6 @@
 ---
 name: design-anchor
-description: "全流程设计 Skill。AI 写代码前读取 token、组件规范和布局原则，写完后自动审计。新项目提取设计方向生成首页，已有产品重构布局、对齐 token、替换不达标组件。"
+description: "全流程设计 Skill——从第一个页面的设计落地到第一百个页面的设计一致性。AI 写代码前读取你的 token、组件规范和布局原则，写完后自动审计合规。新项目提取设计方向生成高完成度首页，已有产品逐页分析后重构布局、对齐 token 体系、替换不达标组件。覆盖 SaaS、AI 工具、管理后台、创意工具等所有产品类型。"
 allowed-tools:
   - Bash
   - Read

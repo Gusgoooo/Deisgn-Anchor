@@ -1,6 +1,6 @@
 ---
 name: design-anchor
-description: "Use when a task touches product UI, design prompts, themes, design tokens, component specs, Design Anchor governance, @design components, MCP, sync, audit, layout restructuring, or long-term AI coding consistency. Covers all product types including B2B/SaaS, AI tools, creative tools, and developer tools. Starts by classifying the project and request: detailed prompts are extracted into tokens, incomplete requests are matched to an internal style prompt for a polished first page, and mature existing products are offered layout restructuring as the default governance mode."
+description: "全流程设计 Skill——从第一个页面的设计落地到第一百个页面的设计一致性。AI 写代码前读取你的 token、组件规范和布局原则，写完后自动审计合规。新项目提取设计方向生成高完成度首页，已有产品逐页分析后重构布局、对齐 token 体系、替换不达标组件。覆盖 SaaS、AI 工具、管理后台、创意工具等所有产品类型。"
 ---
 
 # Design Anchor Skill

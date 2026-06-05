@@ -2,7 +2,7 @@
 
 # Design Anchor
 
-**面向 React + Tailwind 产品应用，从第一个页面的设计落地，到第一百个页面的设计一致性，<br/>Design Anchor 像设计负责人一样主动判断阶段、引导下一步，并覆盖设计的完整生命周期。**
+**全流程设计 Skill——适合长期项目的设计 skill**
 
 <br/>
 
@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square&color=0a0a0a" alt="MIT" />
 </p>
 
-不是生成一个好看的页面——是在长期项目里，每一页都好看、一致、可维护。
+<h3>面向 React + Tailwind 产品应用，从第一个页面的设计落地，到第一百个页面的设计一致性，<br/>Design Anchor 像设计负责人一样主动判断阶段、引导下一步，并覆盖设计的完整生命周期。</h3>
 
 [English](./README.en.md)
 

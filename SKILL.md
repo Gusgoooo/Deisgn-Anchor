@@ -395,17 +395,42 @@ Determine the page's spatial structure before touching any component or color. T
    | **Canvas** | toolbar (top/side) → workspace (center, maximized) → properties panel (collapsible right) | Editor, builder, whiteboard, design tool |
    | **Split** | master list (left) → detail panel (right) | Email, file manager, two-pane navigation |
 
-   Then, **immediately look for a matching open-source block** to use as the page's structural scaffold:
+   Then, **immediately install a matching shadcn block** as the page's structural scaffold.
 
-   | Scenario | Go-to Source | What You Get |
+   **How to install shadcn blocks:**
+
+   ```bash
+   npx shadcn@latest add <block-name>
+   ```
+
+   shadcn blocks are named by component type + variant number. Browse and select the best variant for the page's needs:
+
+   | Component | Available Blocks | How to Choose |
    |---|---|---|
-   | Dashboard, sidebar, settings, auth | **shadcn/ui blocks** | Production-quality page layouts with responsive sidebar, data tables, charts |
-   | Admin CRUD, complete admin app | **shadcn-admin** | 10+ complete pages: dashboard, CRUD list, settings, auth, with sidebar and search |
-   | Extended patterns, login variants | **Kibo UI** | 28+ blocks + 1,100 patterns |
-   | Landing, hero, pricing, CTA | **Launch UI** | Landing page sections (Showcase pages only) |
-   | E-commerce pages | **Commerce UI** | Product, cart, checkout blocks |
+   | **Sidebar** | `sidebar-01` through `sidebar-15` | Browse variants at ui.shadcn.com/blocks. `sidebar-07` = floating with rounded corners. `sidebar-08` = inset floating. `sidebar-10` = collapsible with submenus. Pick the one closest to the page's navigation needs. |
+   | **Dashboard** | `dashboard-01` through `dashboard-07` | Full page compositions. `dashboard-01` = sidebar + charts + table. Pick based on data density and chart needs. |
+   | **Login / Auth** | `login-01` through `login-05` | Different layouts: centered card, split screen, etc. |
+   | **Charts** | `chart-area-*`, `chart-bar-*`, `chart-line-*`, `chart-pie-*`, `chart-radar-*`, `chart-tooltip-*` | Install specific chart types as needed. |
+   | **Calendar** | `calendar-*` | Date picker and calendar view variants. |
 
-   **This is not optional inspiration — it is the default workflow.** When a matching block exists, use it as the page structure. The block gives you a production-quality skeleton (layout, spacing, responsive breakpoints, component arrangement) that would take significant effort to recreate from scratch. Then customize all visual elements with the style prompt in Phase 3.
+   **Example — building a page with a floating sidebar:**
+   ```bash
+   npx shadcn@latest add sidebar-08    # Inset floating sidebar
+   npx shadcn@latest add dashboard-03  # Dashboard layout to pair with it
+   ```
+
+   **After installing, customize extensively with the style prompt.** The block gives you production-quality structure (layout, spacing, responsive breakpoints, component arrangement, collapse behavior). You then apply the style prompt's colors, typography, shadows, and signature elements to make it look like it was custom-designed for this product.
+
+   **Other open-source block sources** (when shadcn doesn't cover the scenario):
+
+   | Scenario | Source |
+   |---|---|
+   | Admin CRUD, complete admin app | **shadcn-admin** (github: satnaing/shadcn-admin) |
+   | Extended patterns | **Kibo UI** (kibo-ui.com) |
+   | Landing / Showcase pages | **Launch UI** (launchuicomponents.com) |
+   | E-commerce pages | **Commerce UI** (github: stackzero-labs/ui) |
+
+   **This is not optional inspiration — it is the default workflow.** Always check if a shadcn block exists for the page type before designing from scratch. The block gives you a skeleton that would take significant effort to recreate — responsive sidebar collapse, proper scroll management, chart integration, data table layout — all production-quality out of the box.
 
    Only design from scratch when no existing block matches the page's specific requirements. Even then, combine patterns from multiple blocks rather than starting from zero.
 

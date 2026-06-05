@@ -1,6 +1,6 @@
 ---
 name: design-anchor
-description: Use when a task touches product UI, design prompts, themes, design tokens, component specs, Design Anchor governance, @design components, MCP, sync, audit, layout restructuring, or long-term AI coding consistency. Covers all product types including B2B/SaaS, AI tools, creative tools, and developer tools. Starts by classifying the project and request: detailed prompts are extracted into tokens, incomplete requests are matched to an internal style prompt for a polished first page, and mature existing products are offered layout restructuring as the default governance mode.
+description: "Use when a task touches product UI, design prompts, themes, design tokens, component specs, Design Anchor governance, @design components, MCP, sync, audit, layout restructuring, or long-term AI coding consistency. Covers all product types including B2B/SaaS, AI tools, creative tools, and developer tools. Starts by classifying the project and request: detailed prompts are extracted into tokens, incomplete requests are matched to an internal style prompt for a polished first page, and mature existing products are offered layout restructuring as the default governance mode."
 ---
 
 # Design Anchor Skill

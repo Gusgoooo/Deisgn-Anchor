@@ -183,6 +183,8 @@ design-anchor/
     └── design-prompts/              # 26 套内置风格方向
 ```
 
+`agents/` 是 Agent Skills 推荐的界面 metadata 目录，只属于 skill 包本身，不会被 Design Anchor 写入用户项目。
+
 ---
 
 ## 设计思路

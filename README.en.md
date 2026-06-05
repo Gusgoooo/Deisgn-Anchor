@@ -183,6 +183,8 @@ design-anchor/
     └── design-prompts/              # 26 curated style directions
 ```
 
+`agents/` is the Agent Skills UI metadata directory for this skill package. Design Anchor does not write it into consumer projects.
+
 ---
 
 ## Design Philosophy

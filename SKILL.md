@@ -1,13 +1,8 @@
 ---
 name: design-anchor
-description: "面向 React + Tailwind 产品应用，从第一个页面的设计落地，到第一百个页面的设计一致性，Design Anchor 像设计负责人一样主动判断阶段、引导下一步，并覆盖设计的完整生命周期：开始、维护、审查、修改。"
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-compatibility:
-  - "Node.js >= 18"
-  - "design-anchor npm package"
+description: "面向 React + Tailwind 产品应用。每当用户涉及 UI、主题、布局、组件、token、设计系统治理或产品界面时使用；从第一个页面的设计落地，到第一百个页面的设计一致性，Design Anchor 像设计负责人一样主动判断阶段、引导下一步，并覆盖设计的完整生命周期：开始、维护、审查、修改。"
+allowed-tools: "Bash Read Write"
+compatibility: "Node.js >= 18, design-anchor npm package"
 ---
 
 # Design Anchor Skill
@@ -18,7 +13,7 @@ Design Anchor behaves like a design lead, not a passive command runner. Diagnose
 
 The npm runtime is the product core: it creates root `design-tokens.json`, manages the local `.anchor/` control plane, exposes MCP, installs source components on demand, and runs sync/audit. For any implementation task, establish the Design Anchor token baseline first. Do not treat Portal or component installation as mandatory first screens.
 
-Use the internal prompt pool as matching material, not as a visible preset board. Do not expose preset names. Say: `我帮你匹配到一个适合这个场景的风格方向，会先转成 token，再生成页面。`
+Use the internal prompt pool as matching material, not as a visible preset board. Do not expose preset names because preset labels make users pick implementation names instead of design intent; translate the match into product-facing direction. Say: `我帮你匹配到一个适合这个场景的风格方向，会先转成 token，再生成页面。`
 
 ## First Move
 
@@ -101,6 +96,8 @@ The skill itself should add nothing to a consumer project folder. New project co
 | `add <component>` | smallest missing functional primitive under `src/components/` | Commit only component source app code uses |
 | `govern` | optional AI bridge files | Only when user/team explicitly wants shared bridge files |
 | `portal` / `audit` | No app UI source by themselves | No new committed files unless followed by requested edits |
+
+Defaulting to no skill-owned files keeps the user's repo maintainable: the runtime remains the single source of project additions, and every addition has a clear lifecycle, rebuild path, and commit posture.
 
 For every real-project implementation, the final response must include a small footprint report: which files were added/changed, which generated/local files were intentionally not staged, and whether any dependency or component source was introduced.
 

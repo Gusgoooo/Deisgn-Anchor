@@ -1,122 +1,69 @@
-# Design Anchor Project Contract
+# Project Contract
 
-Read this before installing Design Anchor, changing component/token files, deciding whether a repo is a consumer project or the Design Anchor source repo, or explaining what should be committed.
+Read this before changing files in a user project, adding tokens, adding component-library files, or reporting what changed.
 
-## Consumer Project Layout
+Design Anchor is a skill workflow. Do not add a `design-anchor` npm dependency. The user project owns the token file, CSS variables, components, and page code.
 
-| Layer | Location | Git strategy | Rule |
+## User Project Layers
+
+| Layer | Typical location | Commit? | Rule |
 |---|---|---|---|
-| User-owned components | `src/components/` | Commit | Real component source added on demand by `anchor add`. Business code imports through `@design` or `@/components`. |
-| Design tokens | `design-tokens.json` | Commit | Product token source of truth. Edit this file, then sync generated assets. |
-| Generated token CSS | `.anchor/design-tokens.generated.css` | Do not commit by default | Generated from root tokens and rebuilt by `sync` / `hydrate`. App CSS imports it from `.anchor/`. |
-| Anchor control plane | `.anchor/` | Do not commit | Local Portal, schema, sync/runtime state, demos, generated CSS, local rules, and MCP target. It is rebuildable with `hydrate` or `sync`. |
-| Component specs | `.anchor/src/anchor/schema/components/*.spec.json` | Do not commit by default | Local AI contract for governed components. Rebuild from the installed runtime. |
-| Optional AI bridge files | `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/anchor.mdc`, `.github/copilot-instructions.md` | Local/ignored by default unless team chooses to share | Created by `anchor govern` or explicit bridge setup. They point AI tools at the local contract. |
-| Optional MCP config | `.mcp.json`, `.cursor/mcp.json` | Local/ignored by default unless team chooses to share | Should call `npx --no-install design-anchor mcp ./.anchor` so clients use the installed dependency. |
-| Upstream package | `node_modules/design-anchor/` | Never commit | Read-only package cache. Do not patch directly. Use `anchor upgrade` or package source changes. |
+| Token source | `design-tokens.json` | Yes | User-owned source of truth for theme decisions. |
+| Global token CSS | `app/globals.css`, `src/index.css`, `src/styles/globals.css`, or CSS path in `components.json` | Yes | CSS variables derived from tokens. |
+| Component config | `components.json` or suite theme config | Yes | Component registry or suite theme config when the project uses one. |
+| Shared UI components | `src/components/ui/*` or project convention | Yes | Token-bound shared components. |
+| Feature/page code | route/page/feature files | Yes | Page composition and business logic. |
+| Generated package cache | `node_modules/` | No | Never stage. |
+| Temporary notes/audits | none by default | No | Keep state in the conversation unless user requests an artifact. |
 
-Never import app UI from `.anchor/` or `node_modules/design-anchor/` deep paths.
+## What May Be Added
 
-## What Gets Added To A User Project
+| Trigger | May add/change | Confirmation |
+|---|---|---|
+| Read-only audit | Nothing | Not needed |
+| Token baseline | `design-tokens.json`, global CSS variables | Proceed if user requested implementation |
+| Theme customization | `design-tokens.json`, global CSS variables | Proceed for explicit theme request; ask before changing locked values |
+| Component baseline | `components.json`, `src/components/ui/*`, shadcn block files, suite theme files, package files | Proceed for Tailwind implementation scope; ask before switching suites or broad installs |
+| Headless wrapper | small reusable component wrapper | Ask if it adds a dependency or broad shared component |
+| Single page rebuild | one page/route/feature file plus existing components | Proceed when user requested page cleanup/rebuild |
+| Multi-page governance | many pages/shared shell/components | Confirm scope and proceed page by page |
 
-The skill itself adds no consumer-project files. It may only invoke the Design Anchor runtime, and each runtime write has a narrow purpose:
+Do not create duplicate design-system folders, temporary docs, wrapper files, or audit ledgers unless the user asks.
 
-| Action | Added or changed | Commit? | Notes |
-|---|---|---|---|
-| Probe / recommendation / read-only audit | Nothing | No | Skill reads and reports only. |
-| Establish token baseline | `package.json`, lockfile, `node_modules/`, root `design-tokens.json`, `.anchor/`, generated token CSS | Manifest, lockfile, and token source yes; `node_modules/` no; `.anchor/` no by default | First step for implementation/governance work when any baseline piece is missing. |
-| Install runtime | `package.json`, lockfile, `node_modules/` | Manifest and lockfile yes; `node_modules/` no | Part of baseline creation when UI/token governance is required and runtime is missing. |
-| `sync` / `hydrate` | `design-tokens.json` if missing, `.anchor/`, `.anchor/design-tokens.generated.css`, local runtime mirrors | Commit `design-tokens.json`; keep `.anchor/` ignored by default | Rebuildable runtime state, not skill-owned files. |
-| `theme` | `.anchor/design-prompt.md`, active prompt rule under `.anchor/`, token updates | Commit token source only by default | Style prompt state remains local unless team chooses otherwise. |
-| `add <component>` | minimal functional primitive source under `src/components/` | Yes, when app imports it | Only for missing accessible interaction primitives. |
-| `govern` | optional AI bridge files (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/anchor.mdc`, MCP config) | Team choice | Requires explicit user/team intent. |
-| `portal` / `audit` | No app UI source by themselves | No | They inspect or report unless followed by requested edits. |
+## Dependency Policy
 
-Do not add skill-owned helper files, temporary docs, wrapper components, custom config files, or duplicate design-system files to the consumer project.
+- Do not install `design-anchor`.
+- Do not add dependencies during read-only work.
+- Prefer existing project components and dependencies.
+- If the project uses Tailwind, use shadcn as the default component layer.
+- If shadcn blocks fit the current functional page, add only the specific block or components needed now.
+- If a non-Tailwind component system exists, use it before adding anything else.
+- Ask before switching component libraries, adding broad starters, or adding a second table/form/chart system.
+- Avoid full starters, broad block bundles, decorative effect libraries, duplicate icon libraries, second table libraries, and second form libraries.
 
-## Source Repo Vs Consumer Repo
+## Logic Preservation
 
-The target is the Design Anchor source package when `package.json` has `"name": "design-anchor"` and the repo contains `bin/anchor.mjs` plus `src/anchor-portal/`.
+When rebuilding an existing page, preserve:
 
-In the source repo:
+- routes and navigation behavior,
+- imports that provide data/business utilities,
+- API calls,
+- state and reducer logic,
+- event handlers,
+- form schemas and validation intent,
+- permission checks,
+- feature flags,
+- data transformations.
 
-- Do not run `npx design-anchor start`; it scaffolds consumer state into the package repo.
-- Edit package source directly, such as `bin/`, `src/anchor`, `src/anchor-portal`, `src/components`, `src/design-tokens`, or `scripts`.
-- Verify with package scripts such as `npm run sync:anchor`, `npm run anchor:audit`, `npm run lint`, `npm run typecheck`, or `npm publish --dry-run` when relevant.
+If visual cleanup would require changing business logic, pause and ask.
 
-In a consumer project:
+## Footprint Report
 
-- Full automatic runtime use targets React + Tailwind web apps such as Next.js, Vite React, Remix, React Router, and similar setups.
-- For any actual UI/theme/token/component/governance implementation in a full-fit stack, establish the token baseline first: installed runtime, root `design-tokens.json`, and generated `.anchor/design-tokens.generated.css`.
-- For React without Tailwind, Astro React islands, or unclear stacks, ask before installing; use token/design guidance until CSS integration is clear.
-- For Vue/Nuxt, Svelte/SvelteKit, Angular, Solid, plain HTML/CSS, React Native, native mobile, Flutter, or backend-only repos, do not install runtime/components by default. Offer an adaptation plan instead.
-- For read-only analysis, documentation, or real-project test-only inspection, report the missing baseline instead of installing.
-- Before the first write in a real project, state the expected footprint: manifest/lockfile, root `design-tokens.json`, local `.anchor/`, generated token CSS, and any component source only if needed.
-- Use `sync` for local background activation: `.anchor`, root `design-tokens.json`, generated CSS, Tailwind extensions, and local rules.
-- Use `hydrate` when `.anchor/` is missing after clone.
-- Use `add` only for components that the current UI actually needs.
-- Use `theme <prompt.md>` when the user gives style direction to extract design tokens.
-- Use `govern` only when the user/team wants root-level AI bridge files for an existing product.
-- Open Portal only for intentional inspection or tuning.
+Final responses after implementation must report:
 
-## Dependency Budget
-
-Default to zero new UI dependencies. Before installing a component, block, effect library, icon library, chart/table package, or helper utility, verify that the project does not already have an equivalent. Prefer adapting existing project code or using an external block as reference-only.
-
-The `design-anchor` runtime/token baseline itself is the exception when UI/token governance is required and missing. It is the first implementation move, not ordinary dependency bloat. After that, install only the smallest missing functional primitive with `add`, and only for real UI implementation work where accessibility, focus, keyboard, ARIA, or viewport behavior would otherwise be risky.
-
-Do not add full starters, broad block bundles, or second libraries for icons/forms/charts/tables/motion unless the user explicitly approves or the project already standardizes on them.
-
-After implementation, report the actual footprint. Do not stage `node_modules/` or `.anchor/` by default; keep `.anchor/` rebuildable and ignored locally unless the team explicitly chooses another policy.
-
-## Preferred Commands
-
-Token baseline / background activation:
-
-```bash
-npm install -D design-anchor
-npx design-anchor sync
-```
-
-Optional AI bridge injection for existing products:
-
-```bash
-npx design-anchor govern
-```
-
-Rebuild local control plane:
-
-```bash
-npx design-anchor hydrate
-```
-
-Add a component on demand only when the current UI task needs a missing accessible primitive:
-
-```bash
-npx design-anchor add button
-```
-
-Extract tokens from a user style prompt:
-
-```bash
-npx design-anchor theme design-prompt.md
-npx design-anchor sync
-```
-
-Inspect or tune Design Anchor state:
-
-```bash
-npx design-anchor portal tokens
-npx design-anchor portal components
-npx design-anchor portal specs
-npx design-anchor portal docs
-```
-
-Post-change checks:
-
-```bash
-npx design-anchor sync
-npx design-anchor audit
-```
-
-Final responses for UI changes must include a `Design Anchor 自检` line.
+- token files changed,
+- global CSS changed,
+- shared components changed or added,
+- page files rebuilt,
+- dependencies added or avoided,
+- QA run or skipped.

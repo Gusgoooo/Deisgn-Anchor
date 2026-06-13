@@ -2,17 +2,16 @@
 
 # Design Anchor
 
-**全流程设计 Skill——适合长期项目的设计 skill**
+**已有项目 UI/UX 重构 Skill**
 
 <br/>
 
 <p>
-  <img src="https://img.shields.io/npm/v/design-anchor?style=flat-square&color=0a0a0a" alt="npm" />
   <img src="https://img.shields.io/badge/Claude_Code-Agent_Skill-6B5CE7?style=flat-square" alt="Claude Code" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square&color=0a0a0a" alt="MIT" />
 </p>
 
-<h3>面向 React + Tailwind 产品应用，从第一个页面的设计落地，到第一百个页面的设计一致性，<br/>Design Anchor 像设计负责人一样主动判断阶段、引导下一步，并覆盖设计的完整生命周期。</h3>
+<h3>保留业务逻辑，重组 UI/UX；用 design-tokens.json 统一视觉，用 UX prompt routing 选择正确交互策略。</h3>
 
 [English](./README.en.md)
 
@@ -20,183 +19,150 @@
 
 ---
 
+## 核心定位
+
+Design Anchor 不依赖同名 npm 包。它面向已有项目做 UI/UX 重构，不主打展示型/营销型页面。
+
+它的基本结构是：
+
+- 先把原页面当作业务逻辑来源，保留路由、数据绑定、状态管理、权限判断、API 调用和事件处理。
+- 再识别页面的真实任务、交互问题、状态缺口和信息层级，选择合适的 UX 策略。
+- 简单页面优先保留布局并局部修复；复杂页面可以重组为表格、分栏、抽屉、模态框、工作流步骤、批量操作等更合适的交互结构。
+- 先建立或尊重用户自己的 `design-tokens.json`，形成美观且一致的样式基座。
+- 基于 token 重新组装页面和组件，让不同页面在颜色、状态、边框、焦点、radius、密度和组件语义上保持一致。
+- Tailwind 项目默认用 shadcn 作为组件执行层，合适时使用 shadcn blocks 做功能页面骨架；非 Tailwind 项目映射到已有组件库主题入口。
+
 ## 为什么需要它
 
-AI 做 UI 的问题不在第一页，在第十页：按钮颜色开始偏移、hover 状态各写各的、icon 库混了三套、布局越来越像默认模板。
+已有项目通常不是不能用，而是页面越做越散：按钮颜色漂移、表格没有筛选和状态、表单反馈弱、危险操作不安全、弹窗每页一套、移动端路径断裂。
 
-Design Anchor 给 AI 加一层设计判断力：
+Design Anchor 的基本判断是：
 
-| 问题 | 怎么解决 |
+| 基础问题 | 处理方式 |
 |---|---|
-| 没有设计基座 | 先装 runtime，建立 `design-tokens.json`，所有结构色走 token |
-| 风格说不清 | 从 26 套内置风格方向自动匹配，转成 token |
-| 页面越做越散 | 主色、状态色、交互态统一走 token；decorative 色自由 |
-| 已有产品不敢动 | 先预检，推荐整页重构，逐页确认后才改 |
-| 做完不知道下一步 | 像设计负责人一样判断阶段，主动给建议 |
-| Token 合规但不好看 | 继续做视觉打磨，直到像专业设计的页面 |
-
----
+| 原页面逻辑不能丢 | 把旧页面作为逻辑来源，只重构呈现、交互和组件结构 |
+| 样式不统一 | 建立/复用 `design-tokens.json`，绑定 CSS variables 和组件库主题 |
+| 任务路径不清 | 识别用户任务、决策点、主次动作和反馈路径 |
+| 页面结构不适合功能 | 根据复杂度选择保留、局部修复或结构性重组 |
+| 状态反馈缺失 | 补 loading/empty/error/saving/success/selected/disabled |
+| 组件不统一 | 基于 token 使用同一套组件语义重新组装页面 |
 
 ## 工作流
 
+```text
+确认范围和回退方式
+  -> 读取已有页面、组件、样式和业务逻辑
+  -> 建立/复用 design-tokens.json 作为样式基座
+  -> 绑定全局 CSS variables 和组件库主题入口
+  -> 识别用户任务、交互问题和状态缺口
+  -> 复杂问题先启发式追问产品目标和用户目标实现轨迹
+  -> 选择合适的 UX 策略
+  -> 基于 token 和组件体系重新组装页面
+  -> 按用户路径做状态/响应式/可访问性自检
+  -> 必要时通过备份、分支或 diff 回退
 ```
-用户需求 → 预检脚本 → 分类路由 → 执行
+
+## 改动提醒
+
+Design Anchor 会尽量保留已有逻辑，但 UI/UX 重构可能会带来较大的页面结构变化，尤其是复杂表格、长表单、审批流、配置页和工作台页面。
+
+遇到复杂、高风险或业务目标不清的问题时，Skill 不应幻想一个完整方案，而是先基于已读代码和界面信号做启发式追问，帮助用户补充这个页面、组件或板块主要解决什么问题，以及产品用户从进入页面到完成目标的实现轨迹。小的局部问题不需要触发这一步。
+
+在成熟项目里使用时，建议先创建 git 分支、提交当前状态或做好备份。这样即使某次重组不符合预期，也可以通过 diff、revert 或分支切换回退到原页面。
+
+## 组件策略
+
+默认顺序：
+
+1. 复用已有 token-compatible 组件。
+2. React + Tailwind 默认使用 shadcn components。
+3. 如果 shadcn blocks 的结构匹配功能页面，就先用 blocks 做骨架，再接回业务逻辑。
+4. 如果已有 MUI / Ant / Chakra / Mantine 等套件库，将 token 映射进它们的主题入口。
+5. 只有现有层覆盖不了交互时，才补 headless primitive 或小型 wrapper。
+
+常用 B 端组件：
+
+```text
+button input textarea label select checkbox switch
+card badge table tabs dialog dropdown-menu popover sheet tooltip
+breadcrumb pagination skeleton toast/sonner
 ```
 
-| 场景 | Skill 做什么 |
-|---|---|
-| **有设计方向** | 保存 prompt → `theme` 抽 token → 生成页面 |
-| **只有产品想法** | 匹配内置风格 → 转 token → 生成首页 |
-| **已有产品** | 预检 → 推荐布局重构 / 渐进优化 / 只读审计 |
-| **不确定下一步** | 判断阶段，主动建议该做什么 |
-| **检查设计系统** | 按需打开 Portal |
+## UX 规则
 
----
+每个功能页面先回答：
 
-## 治理边界
+```text
+用户要完成什么任务？
+他们需要先看到什么信息才能行动？
+主动作、次动作、危险动作分别在哪里？
+页面有哪些 loading / empty / error / saving / success / disabled 状态？
+重复使用时能不能更快？
+移动端和键盘操作有没有断点？
+```
 
-**Token 管结构，不管个性。**
+Blocks 和组件只能承载体验，不能替代 UX 判断；UX prompt 决定交互方向，token 决定视觉一致性。
 
-| 必须走 token | 自由发挥 |
-|---|---|
-| 主按钮、链接、active、focus → `primary` | 装饰渐变、插图色、页面氛围 |
-| 成功 / 警告 / 错误 / 信息 → 语义 token | 数据可视化配色 |
-| hover / disabled → 从 token 派生 | 阴影、质感、signature elements |
+简单页面优先保留原有布局，只做必要修复；复杂页面才引入抽屉、模态框、分栏、批量操作、工作流步骤等结构性改造。
 
-**功能型组件走 runtime，展示型自由设计。**
+`references/ux-prompt-capsules.md` 是交互问题的 prompt 范式库：例如密集数据、上下文编辑、危险操作、长表单、工作流状态、分栏工作台等。
 
-| 类型 | 策略 |
-|---|---|
-| **功能型** (dialog, command, select, popover, sheet, tooltip, tabs) | `npx design-anchor add <component>` — 可访问性、键盘交互、ARIA |
-| **展示型** (卡片、导航、表格、hero、表单排布……) | AI 根据风格 prompt 自由设计，无强制库 |
+设计师补充 UX 知识时，使用 `references/ux-rule-cards.md` 的一行规则格式：只写稳定的判断信号、推荐动作和保护边界，不写像素级细节或临时审美偏好。
 
-**布局靠原则，不靠模板。** 7 条质量原则：目的-布局匹配、信息层级、操作层级、密度适配、空间效率、导航清晰、状态完整。
+复杂问题需要外部范式时，参考 `references/ux-pattern-sources.md` 的权威设计系统路由。它只提示去哪看，例如 Salesforce、IBM、SAP Fiori、GOV.UK、W3C，不要求每次都查。
 
----
+## Token 规则
 
-## 快速开始
+`design-tokens.json` 是用户拥有的主题契约，也是样式统一的核心。Skill 可以创建、补全、建议修改，但不能静默覆盖用户锁定的主题值。新项目默认使用 Design Anchor 的精简语义 token；已有项目可以保留自己的 token 命名，只要通过 `mappings.cssVariables` 和 `mappings.componentLibraries.<library>` 映射到组件需要的 CSS variables。
 
-**安装 Skill：**
+结构色必须走 token：
+
+```text
+primary / primary-foreground
+background / foreground
+card / card-foreground
+muted / muted-foreground
+border / input / ring
+destructive / success / warning
+```
+
+装饰渐变、图表色、插图色和页面氛围色可以保留，只要它们不是结构性状态或主操作色。
+
+## 安装 Skill
 
 ```bash
-# 项目级
 mkdir -p .claude/skills/design-anchor
 cp -R SKILL.md scripts references agents .claude/skills/design-anchor/
+```
 
-# 或全局
+或全局安装：
+
+```bash
 mkdir -p ~/.claude/skills/design-anchor
 cp -R SKILL.md scripts references agents ~/.claude/skills/design-anchor/
 ```
 
-**安装 Runtime（在目标项目里）：**
-
-```bash
-npm install -D design-anchor && npx design-anchor sync
-```
-
-<details>
-<summary>其他包管理器</summary>
-
-```bash
-pnpm add -D design-anchor && pnpm exec design-anchor sync
-yarn add -D design-anchor && yarn design-anchor sync
-bun add -d design-anchor && bunx design-anchor sync
-```
-
-</details>
-
-> Runtime 面向 React + Tailwind 项目。其他技术栈可用 Skill 的设计诊断和布局原则，但 runtime / 组件安装需先确认适配。
-
----
-
-## 命令速查
-
-| 命令 | 作用 |
-|---|---|
-| `npx design-anchor sync` | 激活治理：token CSS、`.anchor`、规则镜像 |
-| `npx design-anchor theme <prompt.md>` | 风格 prompt → token |
-| `npx design-anchor add <component>` | 按需安装功能型组件 |
-| `npx design-anchor audit` | 13 项设计合规审查 |
-| `npx design-anchor govern` | 可选：注入 AI bridge（AGENTS / CLAUDE / Cursor / MCP） |
-| `npx design-anchor hydrate` | clone 后重建 `.anchor/` |
-| `npx design-anchor portal` | 按需查看设计系统 |
-
----
-
-## 质量门槛
-
-每次 UI 改动后自检 13 项：
-
-| # | 门槛 |
-|---|---|
-| 1 | 视觉完成度高，不是线框图 |
-| 2 | 文本 WCAG AA 对比度 |
-| 3 | 交互元素有 hover / focus |
-| 4 | 空、加载、错误状态完整 |
-| 5 | 320 / 768 / 1024 / 1440px 不破版 |
-| 6 | 结构色走语义 token |
-| 7 | 主色全产品一致 |
-| 8 | hover / focus / disabled 派生一致 |
-| 9 | 单一 icon 库 |
-| 10 | 表单有可见 label |
-| 11 | 破坏性操作有确认 |
-| 12 | 键盘可达 |
-| 13 | 无布局跳动 |
-
----
-
-## 交付物
-
-| 产物 | 路径 | 提交 |
-|---|---|---|
-| Token 源 | `design-tokens.json` | ✓ |
-| 生成 CSS | `.anchor/design-tokens.generated.css` | ✗ 可重建 |
-| 功能型组件 | `src/components/` | 按需 |
-| AI bridge | `AGENTS.md` / `CLAUDE.md` / `.cursor/rules/` | 团队决定 |
-| 控制面 | `.anchor/` | ✗ 可重建 |
-
----
-
 ## 目录结构
 
-```
+```text
 design-anchor/
-├── SKILL.md                        # AI 入口：分类、路由、执行规则
+├── SKILL.md
 ├── agents/
-│   └── openai.yaml                 # OpenAI agent metadata
+│   └── openai.yaml
 ├── scripts/
-│   ├── probe-design-anchor.mjs     # 项目预检
-│   └── list-style-prompts.mjs      # 风格池 metadata
+│   ├── probe-design-anchor.mjs
+│   ├── probe-functional-ux.mjs
+│   └── write-token-baseline.mjs
 └── references/
-    ├── govern-existing-product.md   # 已有产品治理
-    ├── layout-governance.md         # 布局原则与组件策略
-    ├── page-rendering-pipeline.md   # 三阶段页面渲染
-    ├── visual-craft.md              # 视觉打磨手册
-    ├── quality-bar.md               # 质量门槛
-    ├── component-decision.md        # 组件安装决策
-    ├── product-context.md           # 产品类型与页面目的
-    ├── style-source-selection.md    # 风格来源选择
-    ├── style-prompt-guidance.md     # 风格 prompt → token
-    ├── project-contract.md          # 文件边界
-    ├── design-prompt-pool.md        # 风格池格式
-    ├── portal-routing.md            # Portal 路由
-    └── design-prompts/              # 26 套内置风格方向
+    ├── token-contract.md
+    ├── functional-ux.md
+    ├── ux-prompt-capsules.md
+    ├── ux-rule-cards.md
+    ├── ux-pattern-sources.md
+    ├── component-system.md
+    ├── b2b-page-patterns.md
+    ├── page-rendering-pipeline.md
+    ├── project-contract.md
+    ├── visual-craft.md
+    └── quality-bar.md
 ```
-
-`agents/` 是 Agent Skills 推荐的界面 metadata 目录，只属于 skill 包本身，不会被 Design Anchor 写入用户项目。
-
----
-
-## 设计思路
-
-**确定性预检** — 脚本先扫描项目输出结构化 JSON，AI 少猜一点。
-
-**渐进加载** — SKILL.md 只做路由，references 按需读取，不塞满上下文。
-
-**模式觉察** — 受 [Impeccable](https://github.com/pbakaus/impeccable) 启发，拦截无意识默认输出，不禁止有意图的设计选择。
-
-**原则驱动** — 布局治理基于质量原则而非固定模板，AI 自由设计但必须能解释为什么。
-
----
-
-MIT

@@ -1,182 +1,150 @@
 # Page Rendering Pipeline
 
-Read this before creating, restructuring, or materially beautifying any page.
+Read this before rebuilding, restructuring, or materially improving an existing functional B2B page.
 
-Every page follows three phases in order:
+The goal is not to patch old styles, force a new layout, or create a showcase page. Extract business logic and content, diagnose the user's task, preserve UI that already works, then modify/add/remove/restructure only where the interaction path fails.
 
-1. Layout Blueprint: what goes where.
-2. Component Composition: what renders in each area.
-3. Visual Styling: how it looks and feels.
+## Phase 1: Understand And Preserve Logic
 
-Do not mix phases. Phase 3 without Phase 1 produces a pretty mess. Phase 2 without Phase 3 produces a component demo. Phase 1 without Phase 3 produces a wireframe.
+Read the page and related components before editing.
 
-## Phase 1: Layout Blueprint
+Preserve:
 
-Determine spatial structure before touching color or component polish.
+- route behavior,
+- data loading,
+- API calls,
+- state management,
+- event handlers,
+- form fields and validation intent,
+- permissions and conditional rendering,
+- domain text and business objects.
 
-### Classify Page Nature
+Discard by default:
 
-| Nature | Description | Layout follows | Style prompt scope |
-|---|---|---|---|
-| Functional | User is doing work: data, chat, settings, monitoring, editing, reviewing, building | Task workflow | Visual skin only: colors, typography, shadows, radius, spacing |
-| Showcase | User is being informed or persuaded: landing, pricing, product tour, onboarding intro | Storytelling flow | Full creative freedom including hero, CTA, feature sections |
+- ad hoc layout,
+- hardcoded structural color classes,
+- inconsistent component styling,
+- raw modals/selects/dropdowns/tabs that should be shared components,
+- filler cards or generic AI layout patterns.
 
-Most product pages are Functional. Dashboards, agent workspaces, settings, chat, and data tables are tools, not brochures.
+If the page imports many local components, inspect the ones that own layout, forms, dialogs, tables, filters, or navigation before replacing them.
 
-Critical rule: a Functional page must not be styled as a Showcase page. No hero sections on dashboards, no feature cards on settings pages, no CTA strips on chat interfaces, no marketing copy on monitoring consoles.
+## Phase 2: Diagnose Functional UX
 
-### Identify Page Purpose
+Read `references/functional-ux.md` and, when the problem maps to a known interaction strategy, `references/ux-prompt-capsules.md`.
 
-Read `references/product-context.md` to classify page purpose: consumption, collection management, single record focus, creation/editing, configuration, conversation, canvas, or workflow orchestration.
+State:
 
-### Select A Layout Block
+- primary user task,
+- entry point and expected exit/success,
+- decision points and required information,
+- high-frequency actions,
+- risky or irreversible actions,
+- missing or weak states,
+- responsive and keyboard/focus risks.
+- selected UX prompt capsule, if any.
 
-| Block | Structure | When to use |
-|---|---|---|
-| Dashboard | stats header -> chart/visualization area -> data table | Monitoring, analytics, overview |
-| List | search/filter bar -> table/grid -> pagination | Collections, queues, inboxes |
-| Detail | entity header -> content sections -> related items | Single record, profile, order, ticket |
-| Form | section groups -> field clusters -> sticky submit bar | Creation, editing, settings |
-| Settings | sidebar category nav -> content panel | Preferences and configuration |
-| Chat | conversation area -> input bar -> optional side panel | Messaging, AI assistant, support |
-| Canvas | toolbar -> workspace -> properties panel | Editor, builder, whiteboard, design tool |
-| Split | master list -> detail panel | Email, files, two-pane navigation |
+Do not choose layout or components until the task and friction are clear.
 
-### Block Install Decision
+Classify major areas as:
 
-External blocks are structural references first, installs second. Install or import a block only when all are true:
+- keep: already supports the task,
+- modify: mostly right but weak hierarchy/state/component consistency,
+- remove: duplicate, distracting, or decorative without task value,
+- add: missing state/control/feedback/safety,
+- restructure: current interaction model blocks efficient task completion.
 
-- The task is real product implementation, not read-only audit, explanation, plan, or throwaway sketch.
-- The project already uses compatible tooling, or the user accepts adding it.
-- The block saves meaningful layout/responsive work.
-- No existing page/layout/component can be adapted with less churn.
-- It will be heavily customized to the style prompt and product workflow.
-- It does not introduce a broad dependency stack for a narrow need.
+## Phase 3: Pick The B2B Pattern
 
-Do not install a block when:
+Read `references/b2b-page-patterns.md` and classify the page:
 
-- The task is analysis-only, documentation, review, token extraction, or Portal inspection.
-- The user asked to avoid new dependencies/files or keep the change minimal.
-- Existing app shell or component system already provides the needed structure.
-- The block introduces a mismatched design language or framework.
-- The block package pulls in multiple dependencies for a pattern that can be reproduced with existing CSS/components.
+- dashboard,
+- list/table,
+- detail,
+- form,
+- settings,
+- workflow,
+- split,
+- workspace.
 
-If useful but not appropriate to install, use the block as reference-only and reproduce the relevant layout idea in existing project files.
+State the page's primary task and choose a layout that serves it. Functional pages must not become marketing/showcase pages.
 
-### Known Block Sources
+## Phase 4: Confirm Token And Component Baseline
 
-Use these as pattern libraries. Install only when the decision above says yes.
+Before major page edits:
 
-| Scenario | Source | Install pattern |
-|---|---|---|
-| Sidebar, dashboards, auth, charts, calendar | shadcn blocks | `npx shadcn@latest add <block-name>` |
-| Kanban, gantt, timeline, file tree, carousel | Kibo UI | `npx kibo-ui add <block-name>` |
-| Landing/showcase sections | Launch UI | `npx shadcn@latest add @launchui/<block>` |
-| E-commerce blocks | Commerce UI | `npx shadcn@latest add https://ui.stackzero.co/r/<block-name>.json` |
-| Complete admin starter | shadcn-admin | Reference-only unless user explicitly wants a full starter |
+1. Read or create `design-tokens.json`.
+2. Confirm global CSS variables exist.
+3. Detect the component system: Tailwind/shadcn, shadcn blocks opportunity, existing custom components, headless wrappers, suite library, or none.
+4. Use token-bound shared components for repeated B2B primitives.
+5. In Tailwind projects, default to shadcn components and use shadcn blocks when the block matches the page task.
+6. For non-Tailwind suites, map tokens into the existing suite.
 
-Examples:
+Read `references/token-contract.md` and `references/component-system.md` when touching either layer.
 
-- shadcn sidebar blocks: `sidebar-01` through `sidebar-15`.
-- shadcn dashboard blocks: `dashboard-01` through `dashboard-07`.
-- shadcn auth blocks: `login-01` through `login-05`.
-- Kibo: `gantt`, `kanban`, `timeline`, `file-tree`, `carousel`, `sortable`, `dnd`, `data-table`, `charts`, `calendar`.
-- Launch UI: `hero`, `navbar`, `footer`, `stats`, `faq`, `cta`, `logos`, `card`, `screenshot`, `mockup`, `glow`.
+## Phase 5: Rebuild Interaction And Composition
 
-After installing, customize extensively. The block is a structural starting point, not the final design.
+Recompose the page with the selected pattern, UX diagnosis, and chosen UX prompt capsule. Preserve the current layout when focused repair is enough; restructure only when the existing interaction model is the problem.
 
-### Layout Output
+1. Page header: location, status/context, primary action.
+2. Core workflow area: table, form, chart, detail summary, active task, or split workspace.
+3. Decision support: filters, comparison, metadata, history, related records, help text, warnings.
+4. Action model: primary, secondary, row, bulk, destructive, undo/confirm, save/cancel.
+5. States: loading, empty, error, partial, saving, saved, success, selected/active, disabled, permission denied.
+6. Responsive behavior: sidebar collapse, filter stacking, table overflow, sheet/dialog behavior.
 
-Phase 1 output is a spatial wireframe:
+Choose the smallest useful interaction pattern:
 
-- section names,
-- positions,
-- relative sizes,
-- page density,
-- and whether the structure comes from an existing project pattern, installed block, or reference-only block.
+- inline controls for simple low-risk edits,
+- drawers/sheets when users need surrounding context,
+- dialogs/modals for short focused tasks or confirmations,
+- tabs for stable information groups,
+- split panes for repeated list/detail work,
+- timelines for history and audit trails,
+- stepper/progress for staged workflows.
 
-No colors yet.
+Use shared components first:
 
-## Phase 2: Component Composition
+- `Button` for actions,
+- `Input`, `Select`, `Checkbox`, `Switch` for forms,
+- `Card` for grouped surfaces,
+- `Table` for dense records,
+- `Tabs` for detail sections,
+- `Badge` for status,
+- `Dialog`/`Sheet`/`Popover`/`DropdownMenu` for interactions,
+- `Skeleton` and empty-state blocks for state handling.
 
-Fill each layout slot with the right component.
+Keep page-only composition inline or feature-local. Create new shared components only when reused now or needed as a component baseline.
 
-Principles:
+## Phase 6: Bind Styling
 
-- Presentational components are freely designed: cards, sections, headers, stat blocks, navigation appearance, data displays, layouts.
-- Functional components use Design Anchor selectively when behavior and accessibility matter.
-- Evaluate existing components against the layout purpose before adding anything.
-- Add missing empty/loading/error/success states as designed states, not afterthoughts.
+Replace structural colors with semantic tokens:
 
-Functional primitives that may come from Design Anchor:
+- primary actions -> `bg-primary text-primary-foreground hover:bg-primary/90`,
+- page surface -> `bg-background text-foreground`,
+- cards -> `bg-card text-card-foreground border-border`,
+- muted regions -> `bg-muted text-muted-foreground`,
+- inputs -> `border-input focus-visible:ring-ring`,
+- destructive actions -> `bg-destructive text-destructive-foreground`,
+- status -> `success`, `warning`, `destructive`, or project-defined semantic tokens.
 
-- `dialog`, `alert-dialog`: focus trap, escape-to-close, overlay.
-- `command`: Cmd/Ctrl+K, keyboard navigation, filtering.
-- `select`: keyboard navigation and ARIA listbox.
-- `popover`, `dropdown-menu`: positioning and viewport overflow.
-- `sheet`: slide-over panel and focus management.
-- `tooltip`: accessible description.
-- `tabs`: keyboard arrow navigation and ARIA tablist.
+Keep intentional decorative colors for charts, illustrations, and page-specific accents.
 
-Install the primitive only when the current real UI task needs it, the project lacks an accessible equivalent, and the user did not constrain new files/deps.
+## Phase 7: Verify By User Path
 
-Effect libraries are optional and rare. Prefer existing CSS/Tailwind/motion utilities. Effects on Functional pages must serve the task, such as progress, status, feedback, or hover clarity.
+Check:
 
-All structural colors must reference token CSS variables or semantic token classes. Decorative colors, gradients, shadows, and page-specific accents remain free.
+- business logic still wired,
+- primary user task is faster or clearer,
+- primary action sits near the decision point,
+- risky actions are safer,
+- component usage is consistent,
+- structural colors are token-bound,
+- page pattern fits the primary task,
+- empty/loading/error/saving/success/selected/disabled states are present where relevant,
+- responsive behavior is explicit,
+- keyboard/focus behavior is not worse,
+- icons come from one library or a documented existing mix,
+- no new dependency was added without confirmation.
 
-Phase 2 output: layout slots filled with components, plus the install decision for any missing functional primitive.
-
-## Phase 3: Visual Styling
-
-Apply the active style prompt as the aesthetic layer across the page.
-
-The style prompt is a visual skin, not a content template. It controls colors, typography, shadows, radius, spacing, animation timing, surface treatment, and signature elements. It does not decide what is on a Functional page.
-
-Read `references/visual-craft.md` for final polishing and beauty recovery.
-
-Apply:
-
-1. Color palette: primary actions, surface tints, accent backgrounds, section colors, status colors.
-2. Typography: font pairing, heading weights, body sizes, line height.
-3. Surface and depth: shadow approach, border treatment, radius, layering.
-4. Signature elements: 2-3 distinctive choices that make the product recognizable.
-5. Decorative touches: subtle background tints, accent borders, gradients, textures, or motion when prompt-aligned.
-
-Visual enhancement pass:
-
-- Pick 3-5 enhancements per page, not all of them.
-- Functional pages get subtle professional polish.
-- Dense pages get lighter surface treatment than spacious pages.
-- Enhancements must match the style prompt.
-- Dark-mode-enabled projects need dark-compatible versions.
-
-Useful no-new-dependency enhancements:
-
-- Subtle page or section gradients aligned with the prompt palette.
-- Section-to-section temperature shifts.
-- Dot grid, noise, or subtle pattern when style supports it.
-- Inset work surface or paper-like content area.
-- Floating sidebar with radius, margin, and elevation.
-- Featured cards with accent background, border highlight, or subtle glow.
-- Unequal bento-style dashboard grids where hierarchy supports it.
-- Hairline dividers with gradient fade.
-- Multi-layer shadows and clear elevation levels.
-- Hover lift, smooth transitions, skeleton shimmer, and button press feedback.
-
-Phase 3 output: a complete page that looks designed for this specific product, not merely token-compliant.
-
-## Screenshot / Reference Image Rules
-
-When the user provides a screenshot, mockup, or reference image:
-
-1. Extract only content and business logic: data structure, text, labels, field types, workflow steps, navigation items.
-2. Redesign the layout. Do not replicate spatial arrangement, section ordering, or component placement.
-3. Freely design components from the style prompt. Do not copy component styles, card shapes, buttons, or visual patterns.
-4. Apply token-constrained structural colors.
-5. Tell the user:
-
-```text
-参考图中提取了内容和业务逻辑，布局和视觉已完全重新设计。
-```
-
-The reference image is a content source, not a design template.
+When a local app can run, verify in browser at desktop and mobile widths. If not, do code-based QA and say so.

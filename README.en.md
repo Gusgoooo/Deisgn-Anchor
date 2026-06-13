@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square&color=0a0a0a" alt="MIT" />
 </p>
 
-<h3>Read an existing page's routes, data, state, permissions, and interaction intent; preserve the business logic that works; restructure weak UI/UX; then use design-tokens.json and a unified component system to make the product clearer, more consistent, and easier to use.</h3>
+<h3>Read an existing page's routes, data, state, permissions, and interaction intent; preserve the business logic that works; restructure weak UI/UX; then use a unified component system to make the product clearer, more consistent, and easier to use.</h3>
 
 [中文](./README.md)
 

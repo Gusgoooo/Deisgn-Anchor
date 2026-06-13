@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square&color=0a0a0a" alt="MIT" />
 </p>
 
-<h3>读取旧页面的路由、数据、状态、权限和交互意图，保留能用的业务逻辑，重组不合理的 UI/UX，再用 design-tokens.json 和统一组件体系让页面一致、清晰、好用。</h3>
+<h3>读取旧页面的路由、数据、状态、权限和交互意图，保留能用的业务逻辑，重组不合理的 UI/UX，再通过统一组件体系让页面一致、清晰、好用。</h3>
 
 [English](./README.en.md)
 

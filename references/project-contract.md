@@ -57,12 +57,27 @@ When rebuilding an existing page, preserve:
 
 If visual cleanup would require changing business logic, pause and ask.
 
+## Component Boundary Contract
+
+When componentizing an existing page:
+
+- Shared UI components may be changed only when the current scope uses them or the user requested component foundation work.
+- Feature-local components should stay inside the feature or route area unless reused across multiple features.
+- Page-only composition should remain in the page file when extraction would obscure the user path.
+- Do not move API calls, route navigation, permission checks, form schemas, validation rules, or domain transformations into shared UI components.
+- Do not create duplicate design-system folders or parallel primitive sets.
+
+Ask before broad component-system restructuring across many pages.
+
 ## Footprint Report
 
 Final responses after implementation must report:
 
 - token files changed,
 - global CSS changed,
+- component boundaries created or preserved,
+- shared vs feature-local components changed,
+- business logic deliberately kept out of shared UI,
 - shared components changed or added,
 - page files rebuilt,
 - dependencies added or avoided,

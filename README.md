@@ -71,6 +71,8 @@ destructive / success / warning
 
 组件策略：
 
+组件隔离不是为了把页面拆碎，而是为了降低 AI 改码风险。Skill 会先判断组件边界：哪些是 shared primitives，哪些是 feature-local components，哪些应该保留为 page-local composition。共享组件不应接管 API、路由、权限、表单校验或业务状态。
+
 1. 优先复用项目已有的 token-compatible 组件。
 2. Tailwind 项目默认采用 shadcn 组件语义，合适时使用 blocks 做功能页面骨架。
 3. 其他组件库通过 mapping 接入主题入口，例如 Ant Design、MUI、Chakra、Mantine、Radix-based 组件体系。
@@ -91,6 +93,7 @@ destructive / success / warning
 
 - `references/token-contract.md`：token 文件结构、CSS variables 和组件库 mapping。
 - `references/functional-ux.md`：业务逻辑识别、交互诊断和重组策略。
+- `references/component-isolation.md`：AI 辅助前端重构时的组件边界、状态归属和防过度组件化规则。
 - `references/ux-prompt-capsules.md`：复杂交互问题的 prompt 范式。
 - `references/ux-rule-cards.md`：设计师补充规则的一行格式。
 - `references/ux-pattern-sources.md`：Salesforce、IBM、SAP Fiori、GOV.UK、W3C 等权威 pattern 查阅路径。
@@ -128,6 +131,7 @@ design-anchor/
     ├── ux-rule-cards.md
     ├── ux-pattern-sources.md
     ├── component-system.md
+    ├── component-isolation.md
     ├── b2b-page-patterns.md
     ├── page-rendering-pipeline.md
     ├── project-contract.md

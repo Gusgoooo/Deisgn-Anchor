@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Anchor"
   short_description: "Refactor existing UI/UX with tokens"
-  default_prompt: "Use $design-anchor to refactor existing B2B/admin product UI without rewriting business logic: establish or honor design-tokens.json for visual consistency, route interaction problems to the right UX prompt strategy, and reassemble pages with token-bound components, shadcn blocks for Tailwind projects, or the existing component suite."
+  default_prompt: "Use $design-anchor to refactor existing B2B/admin product UI without rewriting business logic: establish or honor design-tokens.json for visual consistency, route interaction problems to the right UX prompt strategy, define AI-safe component boundaries before editing, and reassemble pages with token-bound components, shadcn blocks for Tailwind projects, or the existing component suite."

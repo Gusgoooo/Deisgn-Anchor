@@ -82,6 +82,27 @@ Before major page edits:
 
 Read `references/token-contract.md` and `references/component-system.md` when touching either layer.
 
+## Component Boundary Pass
+
+Before rebuilding composition, define the component boundary:
+
+```text
+shared primitives:
+feature-local components:
+page-local composition:
+state owner:
+business logic owner:
+callbacks/events:
+files allowed to change:
+files not to touch:
+```
+
+Use `references/component-isolation.md`.
+
+Keep business logic in the page, route, hook, store, or domain layer. Shared UI components should execute presentation and accessible interaction behavior, not decide permissions, API calls, validation rules, or routing.
+
+Create a new shared component only when it is reused now, replaces repeated unsafe raw UI, or is necessary for the component baseline. Otherwise keep the composition local.
+
 ## Phase 5: Rebuild Interaction And Composition
 
 Recompose the page with the selected pattern, UX diagnosis, and chosen UX prompt capsule. Preserve the current layout when focused repair is enough; restructure only when the existing interaction model is the problem.
@@ -139,6 +160,9 @@ Check:
 - primary action sits near the decision point,
 - risky actions are safer,
 - component usage is consistent,
+- component boundaries are explicit,
+- shared components contain no hidden business logic,
+- one-off layout was not over-extracted,
 - structural colors are token-bound,
 - page pattern fits the primary task,
 - empty/loading/error/saving/success/selected/disabled states are present where relevant,

@@ -71,6 +71,8 @@ destructive / success / warning
 
 Component strategy:
 
+Component isolation is not about splitting pages into fragments. It reduces AI edit risk by classifying boundaries first: shared primitives, feature-local components, or page-local composition. Shared components should not take over APIs, routing, permissions, validation, or business state.
+
 1. Prefer the project's existing token-compatible components.
 2. Tailwind projects default to shadcn component semantics, with blocks used as functional scaffolds when they fit.
 3. Other suites connect through theme mappings, including Ant Design, MUI, Chakra, Mantine, and Radix-based systems.
@@ -91,6 +93,7 @@ A refactored page should deliver:
 
 - `references/token-contract.md`: token structure, CSS variables, and component-library mappings.
 - `references/functional-ux.md`: business-logic recognition, interaction diagnosis, and restructuring strategy.
+- `references/component-isolation.md`: component boundaries, state ownership, and over-componentization guardrails for AI-assisted frontend refactors.
 - `references/ux-prompt-capsules.md`: prompt capsules for complex interaction problems.
 - `references/ux-rule-cards.md`: one-line format for designer-contributed rules.
 - `references/ux-pattern-sources.md`: authority routes such as Salesforce, IBM, SAP Fiori, GOV.UK, and W3C.
@@ -128,6 +131,7 @@ design-anchor/
     ├── ux-rule-cards.md
     ├── ux-pattern-sources.md
     ├── component-system.md
+    ├── component-isolation.md
     ├── b2b-page-patterns.md
     ├── page-rendering-pipeline.md
     ├── project-contract.md

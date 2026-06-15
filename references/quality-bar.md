@@ -70,6 +70,25 @@ Use one component vocabulary per job:
 
 Avoid duplicate button, form, table, chart, or icon systems.
 
+Component isolation fails if:
+
+- a shared component imports page-specific API calls, routes, permissions, or validation schemas,
+- component extraction hides the main user path,
+- a one-off section becomes a shared abstraction without reuse,
+- props become a large bag of page-specific configuration,
+- state ownership becomes unclear,
+- changing one component unexpectedly affects unrelated pages,
+- a second primitive system is introduced for the same job.
+
+Recovery order:
+
+1. Move business logic back to page, route, hook, store, or domain layer.
+2. Keep one-off workflow composition local.
+3. Reduce shared component props to stable visual and interaction inputs.
+4. Use explicit callbacks for events.
+5. Bind structural styling to tokens.
+6. Verify the affected user path.
+
 ## Responsive Quality
 
 Check these breakpoints when a browser can run:
@@ -140,4 +159,5 @@ Before delivery, verify:
 8. accessibility is not worse,
 9. final interaction details are present where useful,
 10. no unapproved dependency was added,
-11. rollback path or diff is clear for broad changes.
+11. rollback path or diff is clear for broad changes,
+12. component boundaries are explicit and no shared UI component owns hidden business logic.

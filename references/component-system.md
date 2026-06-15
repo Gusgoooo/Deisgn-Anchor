@@ -51,6 +51,23 @@ Block rules:
 - Do not use landing/marketing blocks for work surfaces.
 - Verify official/current block instructions before running a generator command in a real project.
 
+## Component Boundary First
+
+Before adding, extracting, or replacing components, read `references/component-isolation.md`.
+
+Classify the target as one of:
+
+| Boundary | Use for | Rule |
+|---|---|---|
+| Shared primitive | buttons, inputs, dialogs, badges, tabs, table controls | token-bound, reusable, no business logic |
+| Product component | repeated domain-neutral product UI, such as EntityHeader or EmptyState | explicit props/callbacks, no API ownership |
+| Feature-local component | workflow-specific section reused inside one feature | may know feature concepts, but should not own global state |
+| Page-local composition | one-off layout or task flow | keep inline when extraction would hide the workflow |
+
+Default to page-local or feature-local composition unless reuse, consistency, accessibility, or risk reduction justifies a shared component.
+
+Do not create shared components that import page-specific APIs, routes, permission checks, validation schemas, or business transformations.
+
 ## Baseline Components
 
 For B2B pages, the useful baseline is:
@@ -139,6 +156,7 @@ Keep business logic intact:
 - preserve API calls,
 - preserve validation rules,
 - preserve routing and permissions.
+- preserve the original state owner. Do not move data loading, permissions, validation intent, routing, or domain transformations into the replacement component.
 
 ## Suite Library Mapping
 

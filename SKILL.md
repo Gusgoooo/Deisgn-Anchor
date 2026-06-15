@@ -1,6 +1,6 @@
 ---
 name: design-anchor
-description: "Refactor existing B2B/admin/SaaS product UI without rewriting business logic: inspect current code, establish or honor design-tokens.json for style consistency, diagnose UX problems, ask heuristic product-goal questions when complexity is high, and reassemble pages with token-bound components, shadcn blocks, or the project's existing component suite for clearer, safer, more consistent workflows."
+description: "Refactor existing B2B/admin/SaaS product UI without rewriting business logic: inspect current code, establish or honor design-tokens.json for style consistency, diagnose UX problems, define AI-safe component boundaries, ask heuristic product-goal questions when complexity is high, and reassemble pages with token-bound components, shadcn blocks, or the project's existing component suite for clearer, safer, more consistent workflows."
 ---
 
 # Design Anchor Skill
@@ -68,6 +68,7 @@ Load only what the task needs:
 - `references/functional-ux.md`: UX diagnosis, heuristic clarification, keep/modify/remove/add/restructure, state and feedback rules.
 - `references/ux-prompt-capsules.md`: compact interaction prompt patterns such as dense records, long forms, risky actions, workflows, split workspaces.
 - `references/component-system.md`: shadcn default for Tailwind, block usage, suite/headless/local component strategy.
+- `references/component-isolation.md`: AI-safe component boundaries, extraction rules, state ownership, and guardrails against over-componentization or hidden business logic.
 - `references/b2b-page-patterns.md`: page pattern selection for dashboards, lists, details, forms, settings, workflows, split views, workspaces.
 - `references/page-rendering-pipeline.md`: page rebuild phases and logic preservation.
 - `references/ux-rule-cards.md`: optional evidence-backed UX rule bank for complex or ambiguous judgment.
@@ -115,14 +116,44 @@ keep | modify | remove | add | restructure
 
 Then route the problem through `references/ux-prompt-capsules.md`. Use one or two prompt capsules as strong direction, not fixed templates.
 
+### AI-Safe Component Isolation
+
+Read `references/component-isolation.md` before extracting, creating, or heavily editing shared components.
+
+Before changing component structure, define:
+
+```text
+allowed edit surface:
+business logic to preserve:
+state owner:
+component owner:
+shared vs feature-local:
+props/callback boundary:
+files that must not be touched:
+```
+
+Rules:
+
+- Keep API calls, routing, permission checks, form schemas, validation intent, and domain transformations outside shared UI components.
+- Shared components should receive explicit props and emit typed callbacks.
+- Feature/page components may compose workflow-specific UI, but must not silently rewrite global component behavior.
+- Extract only when reuse, consistency, accessibility, or risk reduction justifies it.
+- Do not extract one-off layout just because JSX is long.
+- Do not introduce a second component library, form library, table system, chart system, or icon system as a shortcut.
+- Prefer the smallest component boundary that preserves the user path and reduces edit risk.
+
 ### Assemble Components
 
 Read `references/component-system.md` before adding or standardizing components.
 
+- Before adding components, run the component isolation decision: shared primitive, feature-local component, or page-local composition.
 - Reuse existing token-compatible components first.
 - React + Tailwind defaults to shadcn components.
 - Use shadcn blocks only when their structure fits the work surface; replace demo data, preserve logic, remove irrelevant sections, and bind tokens.
 - Non-Tailwind projects should map tokens into the existing suite instead of switching libraries.
+- Keep page-only workflow composition local unless it is reused now or needed as a component baseline.
+- Shared components must not import page-specific APIs, routes, permissions, or validation schemas.
+- Prefer explicit props and callbacks over hidden global reads/writes.
 - Add only the components or blocks needed for the current scope.
 
 ### Rebuild Pages
@@ -137,10 +168,11 @@ Default implementation order:
 4. Diagnose task, friction, states, and risk.
 5. Ask heuristic product-goal questions only if complexity requires it.
 6. Pick the dominant B2B page pattern.
-7. Reassemble with token-bound components.
-8. Add reachable loading, empty, error, saving, success, selected, disabled, and permission states.
-9. Add final interaction and visual craft: subtle transitions, hover/focus states, card lift, contextual action reveal, responsive behavior, and restrained background/surface texture.
-10. Verify responsive, keyboard/focus, visual consistency, and that polish did not hide essential actions.
+7. Define component boundaries: shared primitives, feature-local components, page-local composition, and state owners.
+8. Reassemble with token-bound components.
+9. Add reachable loading, empty, error, saving, success, selected, disabled, and permission states.
+10. Add final interaction and visual craft: subtle transitions, hover/focus states, card lift, contextual action reveal, responsive behavior, and restrained background/surface texture.
+11. Verify responsive, keyboard/focus, visual consistency, and that polish did not hide essential actions.
 
 ## Workflow Router
 
@@ -191,10 +223,12 @@ Use before page restructuring or when the interaction problem is unclear.
 Use when inconsistency comes from ad hoc components.
 
 1. Read `references/component-system.md`.
-2. Detect Tailwind/shadcn, existing suite, headless primitives, or local UI.
-3. Pick one component execution layer.
-4. Convert repeated raw controls to token-bound shared components.
-5. Avoid duplicate table/form/chart/icon systems.
+2. Read `references/component-isolation.md` when extracting, creating, or heavily editing shared components.
+3. Detect Tailwind/shadcn, existing suite, headless primitives, or local UI.
+4. Pick one component execution layer.
+5. Define shared primitive, feature-local, and page-local boundaries.
+6. Convert repeated raw controls to token-bound shared components.
+7. Avoid duplicate table/form/chart/icon systems.
 
 ### Single Page Refactor
 
@@ -232,7 +266,7 @@ Use when unifying a product.
 For implementation work, end with:
 
 ```text
-Design Anchor 自检：业务逻辑保留 ✓ | token基座 ✓ | UX策略 ✓ | 组件统一 ✓ | B端页面范式 ✓ | 状态反馈 ✓ | 响应式 ✓ | 可访问性 ✓ | 视觉细节 ✓ | 回退路径 <branch|backup|diff|not-needed> | 依赖变更 <none|listed>
+Design Anchor 自检：业务逻辑保留 ✓ | token基座 ✓ | UX策略 ✓ | 组件边界 ✓ | 组件统一 ✓ | B端页面范式 ✓ | 状态反馈 ✓ | 响应式 ✓ | 可访问性 ✓ | 视觉细节 ✓ | 回退路径 <branch|backup|diff|not-needed> | 依赖变更 <none|listed>
 ```
 
 If visual/browser verification could not run, state that QA was code-based.
@@ -241,7 +275,11 @@ For file changes, include a footprint report:
 
 - token files changed,
 - global CSS changed,
+- component boundaries defined,
 - shared components changed,
+- feature-local components changed,
+- page-local composition preserved,
+- business logic kept outside shared UI,
 - page files rebuilt,
 - UX interactions/states improved,
 - dependencies added or intentionally avoided.

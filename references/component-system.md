@@ -15,6 +15,8 @@ For B2B products, consistent components are the fastest path to consistent pages
 
 Do not mix multiple component suites for the same job unless the project already has a clear boundary. Do not add a second library for buttons, dialogs, tables, forms, or icons when one already exists.
 
+If GenDesignSystem / Theme Lab artifacts exist, read `references/gendesignsystem-token-bridge.md` and consume its runtime CSS variables instead of creating new component theme values.
+
 ## Tailwind Default
 
 Tailwind projects use shadcn by default because the components are local, token-friendly, and easy to reshape for functional pages.
@@ -46,6 +48,7 @@ Block rules:
 - Preserve routes, permissions, handlers, validation, and domain copy.
 - Remove sections that do not support the page's primary task.
 - Bind structural colors to `design-tokens.json`.
+- If Theme Lab exists, bind structural colors to Theme Lab shadcn adapter variables and extended semantic variables.
 - Add missing states: loading, empty, error, saving, selected, disabled, permission denied.
 - Keep or improve keyboard/focus behavior.
 - Do not use landing/marketing blocks for work surfaces.
@@ -136,6 +139,13 @@ Avoid hardcoded structural colors in shared components:
 
 Decorative accents may be raw values inside page-specific UI when they are not structural anchors.
 
+With GenDesignSystem / Theme Lab:
+
+- Use `bg-background`, `text-foreground`, `bg-card`, `border-border`, `ring-ring`, and related shadcn classes first.
+- Use `bg-[var(--surface-panel)]`, `text-[var(--content-secondary)]`, `border-[var(--border-default)]`, and `[box-shadow:var(--elevation-card)]` only when the standard shadcn class is not expressive enough.
+- Do not use raw Tailwind palette classes, hardcoded hex values, arbitrary OKLCH values, or one-off shadows for structural UI.
+- Do not run `shadcn init` across an existing Theme Lab marker block without checking the diff.
+
 ## Component Replacement Rules
 
 Replace raw or ad hoc UI when it affects consistency, accessibility, interaction quality, or repeated B2B patterns:
@@ -164,6 +174,7 @@ When using MUI, Ant Design, Chakra, Mantine, or a similar suite:
 
 - Do not replace the suite just to make pages consistent.
 - Bind its theme provider, CSS variables, or design-token config to `design-tokens.json`.
+- If Theme Lab exists, map the suite to Theme Lab semantic variables instead.
 - Add `mappings.componentLibraries.<library>.cssVariables` only for variables the suite needs beyond Design Anchor semantic keys.
 - Keep semantic page roles consistent: primary actions, muted text, destructive actions, selected rows, focus rings, card surfaces.
 - Prefer the suite's accessible components over raw HTML for forms, dialogs, menus, tabs, and tables.

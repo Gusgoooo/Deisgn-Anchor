@@ -9,7 +9,9 @@ Design Anchor is a skill workflow. Do not add a `design-anchor` npm dependency. 
 | Layer | Typical location | Commit? | Rule |
 |---|---|---|---|
 | Token source | `design-tokens.json` | Yes | User-owned source of truth for theme decisions. |
+| Theme Lab source | `theme-lab.json` | Yes | GenDesignSystem / Theme Lab manifest when present or requested. |
 | Global token CSS | `app/globals.css`, `src/index.css`, `src/styles/globals.css`, or CSS path in `components.json` | Yes | CSS variables derived from tokens. |
+| Agent theme rules | `AGENTS.md` marker block | Yes | Update only the Theme Lab marker block when installing a persistent Theme Lab contract. |
 | Component config | `components.json` or suite theme config | Yes | Component registry or suite theme config when the project uses one. |
 | Shared UI components | `src/components/ui/*` or project convention | Yes | Token-bound shared components. |
 | Feature/page code | route/page/feature files | Yes | Page composition and business logic. |
@@ -22,6 +24,7 @@ Design Anchor is a skill workflow. Do not add a `design-anchor` npm dependency. 
 |---|---|---|
 | Read-only audit | Nothing | Not needed |
 | Token baseline | `design-tokens.json`, global CSS variables | Proceed if user requested implementation |
+| Theme Lab contract | `theme-lab.json`, Theme Lab global CSS marker, `AGENTS.md` marker | Proceed only when Theme Lab artifacts are present/provided or the user requests GenDesignSystem integration |
 | Theme customization | `design-tokens.json`, global CSS variables | Proceed for explicit theme request; ask before changing locked values |
 | Component baseline | `components.json`, `src/components/ui/*`, shadcn block files, suite theme files, package files | Proceed for Tailwind implementation scope; ask before switching suites or broad installs |
 | Headless wrapper | small reusable component wrapper | Ask if it adds a dependency or broad shared component |
@@ -33,6 +36,7 @@ Do not create duplicate design-system folders, temporary docs, wrapper files, or
 ## Dependency Policy
 
 - Do not install `design-anchor`.
+- Do not create `design-tokens.json` when Theme Lab is already the authoritative token source unless the user asks for a fallback file.
 - Do not add dependencies during read-only work.
 - Prefer existing project components and dependencies.
 - If the project uses Tailwind, use shadcn as the default component layer.
@@ -74,6 +78,8 @@ Ask before broad component-system restructuring across many pages.
 Final responses after implementation must report:
 
 - token files changed,
+- token source used: Theme Lab, design tokens, existing custom, or none,
+- Theme Lab artifacts changed or preserved,
 - global CSS changed,
 - component boundaries created or preserved,
 - shared vs feature-local components changed,

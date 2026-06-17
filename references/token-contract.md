@@ -1,8 +1,13 @@
 # Token Contract
 
-Read this before creating, editing, or binding `design-tokens.json`.
+Read this before creating, editing, or binding visual tokens.
 
-`design-tokens.json` is the user's theme contract. It does not need to use Design Anchor's exact internal names, but it must let the skill emit predictable CSS variables. Use direct semantic keys for new projects, or add mapping profiles for projects with existing token names.
+Design Anchor supports two token paths:
+
+1. GenDesignSystem / Theme Lab contract when present or requested.
+2. `design-tokens.json` as the compact Design Anchor fallback.
+
+`design-tokens.json` is not required when Theme Lab is already the source of truth. If Theme Lab is absent, `design-tokens.json` is the user's theme contract. It does not need to use Design Anchor's exact internal names, but it must let the skill emit predictable CSS variables. Use direct semantic keys for new projects, or add mapping profiles for projects with existing token names.
 
 The goal is a compact token layer that component systems can consume: page surfaces, text, primary actions, borders, focus rings, status colors, charts, sidebar surfaces, and radius. Do not expand the contract into hundreds of derived tokens.
 
@@ -10,16 +15,41 @@ Token is one of the two Design Anchor cores. It solves style consistency: shared
 
 ## Priorities
 
-1. Use an existing `design-tokens.json` when present.
-2. If missing and implementation is requested, create a compact Design Anchor semantic token file.
-3. Bind tokens into the project's existing global CSS file.
-4. Make components consume semantic variables/classes, not raw structural colors.
-5. Add component-library mappings only for the libraries the project actually uses.
-6. Keep decorative richness outside the structural token system when it is intentional.
+1. Use existing Theme Lab artifacts when `theme-lab.json`, `theme-lab:runtime`, or `theme-lab:agents` exists.
+2. Use an existing custom/user token system when it has a clear mapping path.
+3. Use an existing `design-tokens.json` when Theme Lab is absent.
+4. If all token sources are missing and implementation is requested, create a compact Design Anchor semantic token file.
+5. Bind tokens into the project's existing global CSS file.
+6. Make components consume semantic variables/classes, not raw structural colors.
+7. Add component-library mappings only for the libraries the project actually uses.
+8. Keep decorative richness outside the structural token system when it is intentional.
+
+## GenDesignSystem / Theme Lab
+
+Read `references/gendesignsystem-token-bridge.md` when the project mentions GenDesignSystem, Design System Lab, Theme Lab, or contains Theme Lab artifacts.
+
+Theme Lab source signals:
+
+- `theme-lab.json` with `kind: "theme-lab-manifest"`,
+- global CSS marker `/* theme-lab:runtime:start */`,
+- `AGENTS.md` marker `<!-- theme-lab:agents:start -->`,
+- `theme.preset.json`, `vibe.json`, `vibe.manifest.json`, or a theme algorithm handoff.
+
+When detected:
+
+- Treat Theme Lab runtime CSS variables as the styling source of truth.
+- Do not create `design-tokens.json` just to satisfy Design Anchor.
+- Do not run the Design Anchor baseline writer unless the user explicitly wants a fallback token file.
+- Update only Theme Lab marker blocks when they exist.
+- Use Theme Lab shadcn adapter variables for normal shadcn classes.
+- Use extended semantic variables for density, elevation, surfaces, content hierarchy, motion, and richer B2B state styling.
+- If the theme direction should change, update the Theme Lab seed and regenerate through Theme Lab or the available local theme pipeline; do not hand-edit generated semantic values.
+
+For Theme Lab projects, report `token source: theme_lab` in the final self-check.
 
 ## Standard Shape
 
-Use this direct shape when creating a new `design-tokens.json`:
+Use this direct shape only when creating a new `design-tokens.json` fallback:
 
 ```json
 {
@@ -166,7 +196,7 @@ Mapping rules:
 
 ## Write Baseline
 
-When a baseline is missing or incomplete, prefer the bundled writer:
+When a Design Anchor fallback baseline is missing or incomplete, prefer the bundled writer:
 
 ```bash
 node "${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/write-token-baseline.mjs" .
@@ -174,6 +204,7 @@ node "${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/write-token-baseline.mjs
 
 The script:
 
+- detects Theme Lab artifacts and exits without writing a Design Anchor baseline unless forced,
 - creates root `design-tokens.json` when missing,
 - preserves existing token files as the user's source of truth,
 - supports `mappings.cssVariables` for custom token names,
@@ -183,6 +214,8 @@ The script:
 - exits safely if no global CSS file is found.
 
 If the script path cannot resolve, manually apply the same structure.
+
+Do not use this writer to overwrite a GenDesignSystem / Theme Lab contract.
 
 ## User Ownership Rules
 

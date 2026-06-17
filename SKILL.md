@@ -1,11 +1,11 @@
 ---
 name: design-anchor
-description: "Refactor existing B2B/admin/SaaS product UI without rewriting business logic: inspect current code, establish or honor design-tokens.json for style consistency, diagnose UX problems, define AI-safe component boundaries, ask heuristic product-goal questions when complexity is high, and reassemble pages with token-bound components, shadcn blocks, or the project's existing component suite for clearer, safer, more consistent workflows."
+description: "Refactor existing B2B/admin/SaaS product UI without rewriting business logic: inspect current code, establish or honor GenDesignSystem/Theme Lab or design-tokens.json for style consistency, diagnose UX problems, define AI-safe component boundaries, borrow Vercel UI routes such as shadcn/v0/Geist/browser verification when useful, ask heuristic product-goal questions when complexity is high, and reassemble pages with token-bound components or the project's existing component suite for clearer, safer workflows."
 ---
 
 # Design Anchor Skill
 
-Design Anchor 的一句话卖点：**保留业务逻辑，重组 UI/UX；用 `design-tokens.json` 统一视觉，用 UX prompt routing 选择正确交互策略。**
+Design Anchor 的一句话卖点：**保留业务逻辑，重组 UI/UX；优先用 GenDesignSystem/Theme Lab 或 `design-tokens.json` 统一视觉，用 UX prompt routing 选择正确交互策略。**
 
 Use this skill for existing product pages where users do work: admin systems, SaaS apps, CRM, dashboards, tables, forms, settings, approval flows, internal tools, AI workspaces, and operational consoles.
 
@@ -17,19 +17,19 @@ Design Anchor has two equal cores:
 
 | Core | Solves | Artifact |
 |---|---|---|
-| Token foundation | visual consistency across pages and components | `design-tokens.json`, CSS variables, component-library theme mappings |
+| Token foundation | visual consistency across pages and components | GenDesignSystem/Theme Lab contract, `design-tokens.json`, CSS variables, component-library theme mappings |
 | UX prompt routing | interaction strategy and page framework | diagnosis, prompt capsules, keep/modify/remove/add/restructure decisions |
 
 The sequence is: preserve logic -> establish or honor tokens -> diagnose UX -> choose strategy -> reassemble with token-bound components -> verify by user path.
 
 ## First Move
 
-When the request touches UI cleanup, UX refactor, page redesign, design tokens, component consistency, shadcn, Tailwind, tables, forms, dashboards, settings, workflows, or existing B2B pages:
+When the request touches UI cleanup, UX refactor, page redesign, design tokens, GenDesignSystem, Theme Lab, component consistency, shadcn, Tailwind, Vercel UI patterns, tables, forms, dashboards, settings, workflows, or existing B2B pages:
 
 1. Announce:
 
 ```text
-Design Anchor 预检：我会先读取已有页面、组件、样式和业务逻辑；业务逻辑会保留，token 负责样式统一，UX 判断负责交互策略和页面框架。简单问题会直接局部修复；复杂或目标不清的问题会先做启发式追问，再重组页面。
+Design Anchor 预检：我会先读取已有页面、组件、样式和业务逻辑；业务逻辑会保留，优先识别 GenDesignSystem/Theme Lab 或现有 token 作为样式源，UX 判断负责交互策略和页面框架。简单问题会直接局部修复；复杂或目标不清的问题会先做启发式追问，再重组页面。
 ```
 
 2. Probe the project:
@@ -57,7 +57,7 @@ Use scripts as structured checklists, not substitutes for judgment.
 5. State the route:
 
 ```text
-Design Anchor 判断：我建议先做 <read_only_audit|token_foundation|ux_strategy|component_foundation|single_page_refactor|multi_page_governance>，因为 <reason>。本轮范围是 <scope>；组件策略是 <tailwind_shadcn|shadcn_blocks|existing_suite|local_components|ask_first>。
+Design Anchor 判断：我建议先做 <read_only_audit|token_foundation|ux_strategy|component_foundation|single_page_refactor|multi_page_governance>，因为 <reason>。本轮范围是 <scope>；token来源是 <theme_lab|design_tokens|existing_custom|none>；组件策略是 <tailwind_shadcn|shadcn_blocks|existing_suite|local_components|ask_first>。
 ```
 
 ## Reference Map
@@ -65,10 +65,12 @@ Design Anchor 判断：我建议先做 <read_only_audit|token_foundation|ux_stra
 Load only what the task needs:
 
 - `references/token-contract.md`: token file shape, mapping rules, CSS variable binding, user-owned theme rules.
+- `references/gendesignsystem-token-bridge.md`: GenDesignSystem/Theme Lab contract detection, source priority, runtime CSS marker rules, and shadcn adapter usage.
 - `references/functional-ux.md`: UX diagnosis, heuristic clarification, keep/modify/remove/add/restructure, state and feedback rules.
 - `references/ux-prompt-capsules.md`: compact interaction prompt patterns such as dense records, long forms, risky actions, workflows, split workspaces.
 - `references/component-system.md`: shadcn default for Tailwind, block usage, suite/headless/local component strategy.
 - `references/component-isolation.md`: AI-safe component boundaries, extraction rules, state ownership, and guardrails against over-componentization or hidden business logic.
+- `references/vercel-ui-skill-routes.md`: Vercel UI skill lessons from shadcn, v0, Geist, AI Elements, React review, and browser verification.
 - `references/b2b-page-patterns.md`: page pattern selection for dashboards, lists, details, forms, settings, workflows, split views, workspaces.
 - `references/page-rendering-pipeline.md`: page rebuild phases and logic preservation.
 - `references/ux-rule-cards.md`: optional evidence-backed UX rule bank for complex or ambiguous judgment.
@@ -95,10 +97,11 @@ If visual refactor requires changing business logic, pause and ask.
 
 ### Establish Token Foundation
 
-Read `references/token-contract.md` before creating or changing tokens.
+Read `references/token-contract.md` before creating or changing tokens. If GenDesignSystem, Design System Lab, Theme Lab, `theme-lab.json`, or `theme-lab:runtime` appears, also read `references/gendesignsystem-token-bridge.md`.
 
-- Use an existing `design-tokens.json` when present.
-- Create a compact baseline only when missing and implementation is requested.
+- Prefer GenDesignSystem/Theme Lab as the token source when present.
+- Use an existing `design-tokens.json` when Theme Lab is absent.
+- Create a compact Design Anchor baseline only when no stronger token source exists and implementation is requested.
 - Bind semantic variables into the existing global CSS file.
 - Preserve unknown fields and locked/user-defined values.
 - For custom token systems, add `mappings.cssVariables` and optional `mappings.componentLibraries.<library>` profiles instead of renaming everything.
@@ -148,9 +151,10 @@ Read `references/component-system.md` before adding or standardizing components.
 
 - Before adding components, run the component isolation decision: shared primitive, feature-local component, or page-local composition.
 - Reuse existing token-compatible components first.
-- React + Tailwind defaults to shadcn components.
+- React + Tailwind defaults to shadcn components; if Theme Lab is present, use its shadcn adapter variables.
 - Use shadcn blocks only when their structure fits the work surface; replace demo data, preserve logic, remove irrelevant sections, and bind tokens.
 - Non-Tailwind projects should map tokens into the existing suite instead of switching libraries.
+- Read `references/vercel-ui-skill-routes.md` when using shadcn blocks, normalizing v0 output, applying Geist-inspired typography, working on AI interfaces, or planning browser visual verification.
 - Keep page-only workflow composition local unless it is reused now or needed as a component baseline.
 - Shared components must not import page-specific APIs, routes, permissions, or validation schemas.
 - Prefer explicit props and callbacks over hidden global reads/writes.
@@ -164,7 +168,7 @@ Default implementation order:
 
 1. Confirm rollback/scope for broad mature-product changes.
 2. Read the page and layout-owning components completely.
-3. Establish or honor token foundation.
+3. Establish or honor token foundation: Theme Lab first, existing custom/design tokens next, Design Anchor baseline last.
 4. Diagnose task, friction, states, and risk.
 5. Ask heuristic product-goal questions only if complexity requires it.
 6. Pick the dominant B2B page pattern.
@@ -194,19 +198,21 @@ Do not edit files.
 
 ### Token Foundation
 
-Use when style consistency is missing or `design-tokens.json` is absent.
+Use when style consistency is missing, `theme-lab.json` exists, Theme Lab is requested, or `design-tokens.json` is absent.
 
 1. Read `references/token-contract.md`.
-2. Infer existing theme from CSS/config/components.
-3. Create or update `design-tokens.json`.
-4. Prefer:
+2. If Theme Lab / GenDesignSystem appears, read `references/gendesignsystem-token-bridge.md` and treat it as the source of truth.
+3. Infer existing theme from CSS/config/components.
+4. Create/update `theme-lab.json` and marker blocks only when the user provided or requested a Theme Lab contract.
+5. Create or update `design-tokens.json` only when Theme Lab is absent.
+6. Prefer the bundled writer only for the Design Anchor fallback path:
 
 ```bash
 node "${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/write-token-baseline.mjs" .
 ```
 
-5. Bind global CSS variables.
-6. Report changed token values and any user decision needed.
+7. Bind global CSS variables without overwriting unrelated CSS.
+8. Report token source, changed token values, and any user decision needed.
 
 ### UX Strategy
 
@@ -236,11 +242,12 @@ Default for messy existing B2B pages.
 
 1. Read the page source and related components.
 2. Preserve logic and data.
-3. Ensure token foundation exists.
+3. Ensure token foundation exists; prefer Theme Lab when detected.
 4. Route UX problem to prompt capsules.
 5. Choose a B2B pattern.
 6. Rebuild page composition with the smallest useful structural change.
-7. Verify user path and final quality bar.
+7. Use `references/vercel-ui-skill-routes.md` when the refactor involves Vercel-stack shadcn/v0/Geist/AI UI patterns.
+8. Verify user path and final quality bar.
 
 ### Multi-Page Governance
 
@@ -266,7 +273,7 @@ Use when unifying a product.
 For implementation work, end with:
 
 ```text
-Design Anchor 自检：业务逻辑保留 ✓ | token基座 ✓ | UX策略 ✓ | 组件边界 ✓ | 组件统一 ✓ | B端页面范式 ✓ | 状态反馈 ✓ | 响应式 ✓ | 可访问性 ✓ | 视觉细节 ✓ | 回退路径 <branch|backup|diff|not-needed> | 依赖变更 <none|listed>
+Design Anchor 自检：业务逻辑保留 ✓ | token基座 <theme_lab|design_tokens|existing_custom|none> ✓ | UX策略 ✓ | 组件边界 ✓ | 组件统一 ✓ | Vercel UI路由 <used|not-needed> | B端页面范式 ✓ | 状态反馈 ✓ | 响应式 ✓ | 可访问性 ✓ | 视觉细节 ✓ | 回退路径 <branch|backup|diff|not-needed> | 依赖变更 <none|listed>
 ```
 
 If visual/browser verification could not run, state that QA was code-based.
@@ -274,6 +281,7 @@ If visual/browser verification could not run, state that QA was code-based.
 For file changes, include a footprint report:
 
 - token files changed,
+- Theme Lab artifacts changed or preserved,
 - global CSS changed,
 - component boundaries defined,
 - shared components changed,

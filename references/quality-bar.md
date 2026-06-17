@@ -7,7 +7,7 @@ The page is only done when it preserves logic, improves the user's workflow, and
 ## Non-Negotiables
 
 1. Preserve business logic, data contracts, permissions, validation intent, and event handlers.
-2. Use `design-tokens.json` and emitted CSS variables/classes for structural styling.
+2. Use GenDesignSystem/Theme Lab or `design-tokens.json` emitted CSS variables/classes for structural styling.
 3. Choose UX structure from the user's task, not from decorative preference.
 4. Do not turn work surfaces into landing/showcase pages.
 5. Do not add dependencies as a shortcut for beauty.
@@ -57,6 +57,13 @@ Intentional decorative styles may stay raw:
 - one-off visual emphasis that is not a shared semantic state.
 
 When in doubt, preserve decorative styles and govern only the structural anchor.
+
+If Theme Lab is present:
+
+- `theme-lab.json` and the global CSS marker are the source of truth.
+- Do not introduce a separate Design Anchor baseline unless requested.
+- Do not hand-edit generated semantic values to change theme direction.
+- Use shadcn adapter classes first, then extended Theme Lab variables for surfaces, content, elevation, density, motion, and nuanced states.
 
 ## Component Quality
 
@@ -160,4 +167,5 @@ Before delivery, verify:
 9. final interaction details are present where useful,
 10. no unapproved dependency was added,
 11. rollback path or diff is clear for broad changes,
-12. component boundaries are explicit and no shared UI component owns hidden business logic.
+12. component boundaries are explicit and no shared UI component owns hidden business logic,
+13. Theme Lab or Design Anchor token source is explicit and respected.

@@ -162,6 +162,33 @@ function findGlobalCssPath() {
   return candidates.find(has) || null;
 }
 
+function detectThemeLab(cssRel) {
+  const manifest = readJson(join(target, "theme-lab.json"));
+  const pkg = readJson(join(target, "package.json"));
+  const css = cssRel ? readText(join(target, cssRel)) : "";
+  const agents = readText(join(target, "AGENTS.md"));
+  const hasSourcePipeline = pkg?.name === "gen-design-system"
+    || (has("lib/theme/schema.ts")
+      && has("lib/theme/derive-theme.ts")
+      && has("lib/theme/shadcn-adapter.ts")
+      && has("lib/theme/export-json.ts"));
+  return {
+    detected: Boolean(manifest)
+      || has("theme.preset.json")
+      || has("vibe.json")
+      || has("vibe.manifest.json")
+      || css.includes("theme-lab:runtime:start")
+      || agents.includes("theme-lab:agents:start")
+      || hasSourcePipeline,
+    hasManifest: Boolean(manifest),
+    manifestKind: manifest?.kind || null,
+    sourceOfTruth: manifest?.theme?.sourceOfTruth || null,
+    hasRuntimeMarker: css.includes("theme-lab:runtime:start"),
+    hasAgentsMarker: agents.includes("theme-lab:agents:start"),
+    hasSourcePipeline
+  };
+}
+
 function mergeTokens(existing) {
   if (!existing) return defaultTokens;
   return existing;
@@ -278,12 +305,28 @@ ${varLines(dark)}
 ${markerEnd}`;
 }
 
+const forceDesignAnchor = process.argv.includes("--force-design-anchor");
+const cssRel = findGlobalCssPath();
+const themeLab = detectThemeLab(cssRel);
+
+if (themeLab.detected && !forceDesignAnchor) {
+  console.log(JSON.stringify({
+    ok: true,
+    skipped: true,
+    tokenSource: "theme-lab",
+    designTokens: null,
+    globalCss: cssRel,
+    themeLab,
+    message: "GenDesignSystem / Theme Lab artifacts detected. Skipped Design Anchor baseline to avoid creating a parallel token source. Use Theme Lab runtime CSS variables or rerun with --force-design-anchor only if the user explicitly wants a fallback design-tokens.json."
+  }, null, 2));
+  process.exit(0);
+}
+
 const tokenPath = join(target, "design-tokens.json");
 const existingTokens = readJson(tokenPath);
 const tokens = mergeTokens(existingTokens);
 writeFileSync(tokenPath, `${JSON.stringify(tokens, null, 2)}\n`);
 
-const cssRel = findGlobalCssPath();
 if (!cssRel) {
   console.log(JSON.stringify({
     ok: true,

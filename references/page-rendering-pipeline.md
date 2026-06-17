@@ -73,14 +73,15 @@ State the page's primary task and choose a layout that serves it. Functional pag
 
 Before major page edits:
 
-1. Read or create `design-tokens.json`.
-2. Confirm global CSS variables exist.
-3. Detect the component system: Tailwind/shadcn, shadcn blocks opportunity, existing custom components, headless wrappers, suite library, or none.
-4. Use token-bound shared components for repeated B2B primitives.
-5. In Tailwind projects, default to shadcn components and use shadcn blocks when the block matches the page task.
-6. For non-Tailwind suites, map tokens into the existing suite.
+1. Detect Theme Lab / GenDesignSystem artifacts before creating fallback tokens.
+2. Read or create `design-tokens.json` only when Theme Lab is absent.
+3. Confirm global CSS variables exist.
+4. Detect the component system: Tailwind/shadcn, shadcn blocks opportunity, existing custom components, headless wrappers, suite library, or none.
+5. Use token-bound shared components for repeated B2B primitives.
+6. In Tailwind projects, default to shadcn components and use shadcn blocks when the block matches the page task.
+7. For non-Tailwind suites, map tokens into the existing suite.
 
-Read `references/token-contract.md` and `references/component-system.md` when touching either layer.
+Read `references/token-contract.md` and `references/component-system.md` when touching either layer. Read `references/gendesignsystem-token-bridge.md` when Theme Lab appears.
 
 ## Component Boundary Pass
 
@@ -102,6 +103,18 @@ Use `references/component-isolation.md`.
 Keep business logic in the page, route, hook, store, or domain layer. Shared UI components should execute presentation and accessible interaction behavior, not decide permissions, API calls, validation rules, or routing.
 
 Create a new shared component only when it is reused now, replaces repeated unsafe raw UI, or is necessary for the component baseline. Otherwise keep the composition local.
+
+## Vercel UI Route Pass
+
+Read `references/vercel-ui-skill-routes.md` when the target uses Vercel-stack UI patterns or when v0/shadcn/Geist/AI Elements/browser verification can improve the refactor.
+
+Use it to:
+
+- normalize v0-generated UI instead of accepting it as final,
+- choose shadcn primitives for common B2B interactions,
+- apply Geist-inspired typography discipline,
+- select AI Elements only for AI-native interfaces,
+- plan browser verification after implementation.
 
 ## Phase 5: Rebuild Interaction And Composition
 
@@ -163,6 +176,7 @@ Check:
 - component boundaries are explicit,
 - shared components contain no hidden business logic,
 - one-off layout was not over-extracted,
+- Theme Lab or Design Anchor token source was respected,
 - structural colors are token-bound,
 - page pattern fits the primary task,
 - empty/loading/error/saving/success/selected/disabled states are present where relevant,

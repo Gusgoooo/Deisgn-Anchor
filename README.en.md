@@ -27,7 +27,7 @@ The core moves are simple:
 
 1. Preserve business logic: routes, APIs, state, permissions, validation, and event handlers stay intact.
 2. Refactor UI/UX: identify user tasks, information hierarchy, state gaps, and interaction problems; then preserve, repair, or restructure.
-3. Unify visuals: establish or reuse `design-tokens.json`, then rebuild pages with token-bound components.
+3. Unify visuals: prefer GenDesignSystem / Theme Lab; otherwise establish or reuse `design-tokens.json`, then rebuild pages with token-bound components.
 
 ## Best Fit
 
@@ -41,7 +41,7 @@ The core moves are simple:
 ```text
 Read existing pages
   -> extract business logic and user tasks
-  -> create/reuse design-tokens.json
+  -> connect Theme Lab or design-tokens.json
   -> choose a UX strategy
   -> reassemble pages with one component system
   -> reconnect data, state, permissions, and events
@@ -56,7 +56,9 @@ When product intent is unclear, change risk is high, or the page task is complex
 
 ## Tokens And Components
 
-`design-tokens.json` is the core style contract. The Skill may create, complete, or map tokens, but should not silently overwrite user-defined themes.
+GenDesignSystem / Theme Lab is the preferred token source. When a project already has `theme-lab.json` or a `theme-lab:runtime` CSS marker, the Skill consumes its shadcn adapter and semantic variables instead of silently creating a parallel `design-tokens.json`.
+
+When Theme Lab is absent, `design-tokens.json` is the fallback style contract. The Skill may create, complete, or map tokens, but should not silently overwrite user-defined themes.
 
 Structural styles must come from tokens:
 
@@ -74,9 +76,10 @@ Component strategy:
 Component isolation is not about splitting pages into fragments. It reduces AI edit risk by classifying boundaries first: shared primitives, feature-local components, or page-local composition. Shared components should not take over APIs, routing, permissions, validation, or business state.
 
 1. Prefer the project's existing token-compatible components.
-2. Tailwind projects default to shadcn component semantics, with blocks used as functional scaffolds when they fit.
+2. Tailwind projects default to shadcn component semantics; when Theme Lab exists, component styles should resolve through its shadcn adapter variables.
 3. Other suites connect through theme mappings, including Ant Design, MUI, Chakra, Mantine, and Radix-based systems.
-4. Components provide consistent execution; business tasks and UX judgment decide the page structure.
+4. Vercel UI skills are used as execution references: shadcn for components, v0 output for normalization, Geist for typography discipline, and browser verify for visual checks.
+5. Components provide consistent execution; business tasks and UX judgment decide the page structure.
 
 ## Quality Bar
 
@@ -92,8 +95,10 @@ A refactored page should deliver:
 ## References
 
 - `references/token-contract.md`: token structure, CSS variables, and component-library mappings.
+- `references/gendesignsystem-token-bridge.md`: GenDesignSystem / Theme Lab token contract, runtime marker, and shadcn adapter integration.
 - `references/functional-ux.md`: business-logic recognition, interaction diagnosis, and restructuring strategy.
 - `references/component-isolation.md`: component boundaries, state ownership, and over-componentization guardrails for AI-assisted frontend refactors.
+- `references/vercel-ui-skill-routes.md`: Vercel UI skill routes for shadcn, v0, Geist, AI Elements, React review, and browser verification.
 - `references/ux-prompt-capsules.md`: prompt capsules for complex interaction problems.
 - `references/ux-rule-cards.md`: one-line format for designer-contributed rules.
 - `references/ux-pattern-sources.md`: authority routes such as Salesforce, IBM, SAP Fiori, GOV.UK, and W3C.
@@ -126,12 +131,14 @@ design-anchor/
 │   └── write-token-baseline.mjs
 └── references/
     ├── token-contract.md
+    ├── gendesignsystem-token-bridge.md
     ├── functional-ux.md
     ├── ux-prompt-capsules.md
     ├── ux-rule-cards.md
     ├── ux-pattern-sources.md
     ├── component-system.md
     ├── component-isolation.md
+    ├── vercel-ui-skill-routes.md
     ├── b2b-page-patterns.md
     ├── page-rendering-pipeline.md
     ├── project-contract.md

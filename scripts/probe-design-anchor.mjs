@@ -164,6 +164,35 @@ function hasSemanticTokenCss(cssPath) {
     && /--border\s*:/.test(css);
 }
 
+function detectThemeLab(cssPath) {
+  const manifest = readJson(join(target, "theme-lab.json"));
+  const pkg = readJson(join(target, "package.json"));
+  const css = cssPath ? readText(join(target, cssPath)) : "";
+  const agents = readText(join(target, "AGENTS.md"));
+  const hasRuntimeMarker = css.includes("theme-lab:runtime:start");
+  const hasAgentsMarker = agents.includes("theme-lab:agents:start");
+  const hasManifest = Boolean(manifest);
+  const hasPreset = has("theme.preset.json");
+  const hasVibe = has("vibe.json") || has("vibe.manifest.json");
+  const hasSourcePipeline = pkg?.name === "gen-design-system"
+    || (has("lib/theme/schema.ts")
+      && has("lib/theme/derive-theme.ts")
+      && has("lib/theme/shadcn-adapter.ts")
+      && has("lib/theme/export-json.ts"));
+  return {
+    detected: hasManifest || hasRuntimeMarker || hasAgentsMarker || hasPreset || hasVibe || hasSourcePipeline,
+    hasManifest,
+    manifestKind: manifest?.kind || null,
+    sourceOfTruth: manifest?.theme?.sourceOfTruth || null,
+    algorithmVersion: manifest?.theme?.algorithmVersion || null,
+    hasRuntimeMarker,
+    hasAgentsMarker,
+    hasPreset,
+    hasVibe,
+    hasSourcePipeline,
+  };
+}
+
 function detectComponentRegistryConfig() {
   const json = readJson(join(target, "components.json"));
   if (!json) return null;
@@ -212,6 +241,7 @@ const cssStrategies = detectCssStrategy(pkg);
 const componentSystems = detectComponentSystem(pkg);
 const iconLibraries = detectIconLibraries(pkg);
 const globalCssPath = detectGlobalCssPath();
+const themeLab = detectThemeLab(globalCssPath);
 const componentRegistryConfig = detectComponentRegistryConfig();
 const signals = projectSignals();
 
@@ -239,6 +269,14 @@ const result = {
   recommendedMode: signals.projectMaturity === "complete"
     ? "existing-product-ui-ux-refactor"
     : "token-foundation-and-ux-strategy-first",
+  tokenSourcePriority: themeLab.detected
+    ? "theme-lab"
+    : has("design-tokens.json")
+      ? "design-tokens"
+      : has("src/design-tokens/tokens.json")
+        ? "legacy-design-tokens"
+        : "none",
+  themeLab,
   projectSignals: signals,
   hasDesignTokens: has("design-tokens.json"),
   hasLegacyTokens: has("src/design-tokens/tokens.json"),
@@ -256,7 +294,9 @@ const result = {
   iconLibraries,
   hasMultipleIconLibraries: iconLibraries.length > 1,
   suggestedCommands: {
-    writeTokenBaseline: "node ${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/write-token-baseline.mjs .",
+    writeTokenBaseline: themeLab.detected
+      ? null
+      : "node ${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/write-token-baseline.mjs .",
     shadcnInit: isReactTailwind && !hasShadcn ? shadcnCommand(pm, "init") : null,
     shadcnAddCore: isReactTailwind ? shadcnCommand(pm, "add button input textarea label card badge table tabs dialog dropdown-menu select popover sheet tooltip skeleton sonner") : null,
     shadcnAddDashboardBlock: isReactTailwind ? shadcnCommand(pm, "add dashboard-01") : null,
@@ -275,14 +315,24 @@ if (!isReactTailwind) {
   result.recommendedNextSteps.push("React + Tailwind detected. Default component layer is shadcn; use shadcn blocks when a block matches the functional page pattern.");
 }
 
-if (!result.hasDesignTokens) {
+if (themeLab.detected) {
+  result.recommendedNextSteps.push("GenDesignSystem / Theme Lab artifacts detected. Treat Theme Lab runtime CSS and theme-lab.json as the token source of truth; do not create a parallel design-tokens.json baseline.");
+  if (themeLab.hasRuntimeMarker) {
+    result.recommendedNextSteps.push(`Theme Lab runtime marker found in ${globalCssPath || "global CSS"}. Update only the marker block when changing theme variables.`);
+  }
+  if (!themeLab.hasAgentsMarker) {
+    result.recommendedNextSteps.push("Consider adding or updating the AGENTS.md Theme Lab marker only if the user wants a persistent project contract.");
+  }
+} else if (!result.hasDesignTokens) {
   result.recommendedNextSteps.push(`Create root design-tokens.json as the user-owned semantic theme contract before broad UI cleanup. Suggested bundled writer: ${result.suggestedCommands.writeTokenBaseline}`);
 }
 
 if (!result.globalCssPath) {
   result.recommendedNextSteps.push("No obvious global CSS file detected. Locate the app's Tailwind/global CSS entry before binding token variables.");
-} else if (!result.hasSemanticTokenCss) {
+} else if (!result.hasSemanticTokenCss && !themeLab.detected) {
   result.recommendedNextSteps.push(`Bind design tokens into ${result.globalCssPath} with semantic variables such as --background, --foreground, --primary, --border, and --ring.`);
+} else if (themeLab.detected) {
+  result.recommendedNextSteps.push("Use Theme Lab shadcn adapter classes and extended semantic variables for structural UI. Avoid raw Tailwind palette classes and hardcoded hex values.");
 }
 
 if (result.hasShadcn) {
